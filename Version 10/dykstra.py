@@ -100,7 +100,7 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
 
             # Check if current point is in the halfspace (V9)
             if plot_active_halfspaces:
-                if not is_in_half_space(x_temp+ e[index], normal, offset):
+                if not is_in_half_space(x_temp + e[index], normal, offset):
                     # Set item to 1 if halfspace is active, 0 otherwise
                     active_half_spaces[m][i] = 1
 
