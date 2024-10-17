@@ -1,1 +1,1 @@
-"Use this directory for new Latex module" 
+Use this directory for new Latex modules
