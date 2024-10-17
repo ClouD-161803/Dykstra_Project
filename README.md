@@ -3,7 +3,8 @@
 Project investigating Dykstra's algorithm for Hilbert space projection onto convex sets' intersection.
 
 ## STRUCTURE:
-echo "
+
+```python
 |   README.md
 |   structure.txt
 |   
