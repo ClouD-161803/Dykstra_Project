@@ -4,7 +4,7 @@ Project investigating Dykstra's algorithm for Hilbert space projection onto conv
 
 ## STRUCTURE:
 
-```python
+```markdown
 |   README.md
 |   structure.txt
 |   
