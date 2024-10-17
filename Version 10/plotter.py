@@ -174,7 +174,7 @@ def plot_half_spaces(Nc_pairs: list, num_of_iterations: int, ax: object) -> None
         # Add labels and title
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
-        ax.set_title(f"Modified Dykstra's algorithm (variable beta) "
+        ax.set_title(f"Modified Dykstra's algorithm "
                      f"executed for {num_of_iterations} iterations")
         ax.grid(True)
 
@@ -255,7 +255,7 @@ def plot_active_spaces(active_spaces: list, num_of_iterations: int) -> None:
     # Find total number of halfspaces
     num_of_spaces = len(active_spaces)
     iterations = np.arange(0, num_of_iterations, 1) # for plotting
-    # Create figure objects
+    # Create figure and axis objects
     fig = plt.figure(figsize=(8, 10))  # Create the figure
     gs = gridspec.GridSpec(num_of_spaces, 1)  # n rows, 1 column
     ax_vector = np.zeros(num_of_spaces, dtype=object) # initialise vector

@@ -28,104 +28,10 @@ Additional Features:
 
 import numpy as np
 from gradient import quadprog_solve_qp # needed to track error (V4)
+from dykstra_functions import (is_in_half_space,
+                               project_onto_half_space,
+                               delete_inactive_half_spaces)
 
-
-def normalise(normal: np.ndarray, offset: np.ndarray) -> tuple:
-    """
-    Normalises half space normal and constant offset.
-
-    Args:
-        normal: Normal vector of the half space.
-        offset: Constant offset of the half space.
-
-    Returns:
-        tuple: Unit normal vector and normalised offset.
-    """
-    # Obtain normal
-    norm = np.linalg.norm(normal)
-    if norm == 0:  # me and my homies hate division by 0
-        raise ValueError("Warning: Zero-norm normal vector encountered.")
-    else:
-        # Normalise normal
-        unit_normal = normal / norm
-        # Normalise offset
-        constant_offset = offset / norm
-
-    return unit_normal, constant_offset
-
-
-def is_in_half_space(point: np.ndarray, unit_normal: np.ndarray,
-                            constant_offset: np.ndarray) -> bool:
-    """
-    Checks if a point lies within a single half space.
-
-    Args:
-        point: Point to check.
-        unit_normal: Unit normal vector of the half space.
-        constant_offset: Constant offset of the half space.
-
-    Returns:
-        bool: True if point is within the half space, else False.
-    """
-
-    # Find dot product
-    dp = np.dot(point, unit_normal)
-
-    # Return boolean
-    return dp <= constant_offset
-
-
-def project_onto_half_space(point: np.ndarray, normal: np.ndarray,
-                            offset: np.ndarray) -> np.ndarray:
-    """
-    Projects a point onto a single half space.
-
-    Args:
-        point: Point to project.
-        normal: Normal vector of the half space.
-        offset: Constant offset of the half space.
-
-    Returns:
-        np.ndarray: Projected point.
-    """
-
-    # Normalise
-    unit_normal, constant_offset = normalise(normal, offset)
-
-    # Check if point is already in the half space
-    if is_in_half_space(point, unit_normal, constant_offset):
-        return point
-    # Project point onto the half space's boundary
-    else:
-        boundary_projection = (point - (np.dot(point, unit_normal)
-                                        - constant_offset) * unit_normal)
-        return boundary_projection
-
-
-
-def delete_inactive_half_spaces(z: np.ndarray, N: np.ndarray, c: np.ndarray) -> tuple:
-    """
-    Deletes inactive half spaces.
-
-    Args:
-        z: Point used to check for inactive half spaces.
-        N: Matrix of normal vectors.
-        c: Vector of constant offsets.
-
-    Returns:
-        tuple: Updated matrix of normal vectors and vector of constant offsets.
-    """
-    # Initialise empty removal vector
-    indices_to_remove = np.zeros_like(c, dtype=bool)
-    for m, (normal, offset) in enumerate(zip(N, c)):
-        # Normalise
-        unit_normal, constant_offset = normalise(normal, offset)
-        # Check if half space is inactive
-        if is_in_half_space(z, unit_normal, constant_offset):
-            indices_to_remove[m] = True
-    new_N = N[~indices_to_remove]
-    new_c = c[~indices_to_remove]
-    return new_N, new_c
 
 def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
                        max_iter: int, track_error: bool=False,
@@ -174,43 +80,44 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
     e = [errors] * n  # list of a number of error vectors equal to n
 
     # Vector for storing all errors (V8)
-    if plot_errors:
-        errors_for_plotting = [e.copy()] # initialise with all zeros
-        # print(f"Errors for plotting {errors_for_plotting}") for debugging
+    # if plot_errors:
+    errors_for_plotting = [e.copy()] # initialise with all zeros
+    # print(f"Errors for plotting {errors_for_plotting}") for debugging
 
     # Path
     path = [z.copy()]  # Initialize the path with the original point
 
-    # Active halfspaces vector (V9)
-    if plot_active_halfspaces:
-        active_half_spaces = [[np.zeros_like(n) for _ in range(max_iter)]
-                              for _ in range(n)]
+    # Active halfspaces matrix  (V9)
+    # if plot_active_halfspaces:
+    active_half_spaces = [[np.zeros_like(n) for _ in range(max_iter)]
+                            for _ in range(n)]
 
     # Stall check (V9)
     stalling = False # initialise boolean
+    # Matrix of successive projections
     x_historical = [[np.zeros_like(z) for _ in range(n)] for _ in range(max_iter)]
 
     # Optimal solution (V4)
-    if track_error:
-        # FROM DOCUMENTATION:
-        # (see https://scaron.info/blog/quadratic-programming-in-python.html)
-        # " The quadratic expression ∥Ax − b∥^2 of the least squares optimisation
-        #   is written in standard form with P = 2A^TA and q = −2A^Tb "
-        # We are solving min_x ∥x − z∥^2 s.t. Gx <= h so set:
-        A = np.eye(dimensions)
-        b = z.copy()
-        # @ command is recommended
-        P = 2 * np.matmul(A.T, A)
-        q = -2 * np.matmul(A.T, b)
-        G = N
-        h = c
-        # Find projection
-        actual_projection = quadprog_solve_qp(P, q, G, h)
-        # Initialise errors vector
-        squared_errors = np.zeros(max_iter)
-        # Initialise vectors for tracking stalling and convergence
-        stalled_errors = np.zeros(max_iter)
-        converged_errors = np.zeros(max_iter)
+    # if track_error:
+    # FROM DOCUMENTATION:
+    # (see https://scaron.info/blog/quadratic-programming-in-python.html)
+    # " The quadratic expression ∥Ax − b∥^2 of the least squares optimisation
+    #   is written in standard form with P = 2A^TA and q = −2A^Tb "
+    # We are solving min_x ∥x − z∥^2 s.t. Gx <= h so set:
+    A = np.eye(dimensions)
+    b = z.copy()
+    # @ command is recommended
+    P = 2 * np.matmul(A.T, A)
+    q = -2 * np.matmul(A.T, b)
+    G = N
+    h = c
+    # Find projection
+    actual_projection = quadprog_solve_qp(P, q, G, h)
+    # Initialise errors vector
+    squared_errors = np.zeros(max_iter)
+    # Initialise vectors for tracking stalling and convergence
+    stalled_errors = np.zeros(max_iter)
+    converged_errors = np.zeros(max_iter)
 
     # Main body of Dykstra's algorithm
     for i in range(max_iter):
