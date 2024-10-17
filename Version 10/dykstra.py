@@ -59,8 +59,8 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
         errors for plotting if selected, and active half spaces if selected."""
 
 
-    # Eliminate inactive halfspaces (V9)
-    N, c = delete_inactive_half_spaces(z, N, c)
+    # # Eliminate inactive halfspaces (V9)
+    # N, c = delete_inactive_half_spaces(z, N, c)
 
     # Initialise variables
     n = N.shape[0]  # Number of half-spaces

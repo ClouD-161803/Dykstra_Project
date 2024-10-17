@@ -35,7 +35,7 @@ def test_with_tracking() -> None:
     # Exact solution = [0, 1]
 
     # Point very far to the bottom left (stalls)
-    z = np.array([-1.75, 1.75])
+    z = np.array([-10, 10])
 
     # 17 iterations to exit stalling for non-rounded box [-4, 4]
     # after 16 iterations non-rounded box gives approximation of [-0.8  1.4]
@@ -71,10 +71,10 @@ def test_with_tracking() -> None:
     distance = actual_projection - projection
 
     # Compare to dykstra approximation (V4)
-    print(
+    print(f"\n"
         f"\nThe finite time projection over {max_iter} iteration(s) is: "
         f"{projection};\nThe distance to the optimal solution is: "
-        f"{distance}\nThe squared-error is {np.dot(distance, distance)}")
+        f"{distance}\nThe squared-error is {np.dot(distance, distance)}\n")
 
     # Create infrastructure for two plots (V4)
     fig = plt.figure(figsize=(8, 10))  # Create the figure

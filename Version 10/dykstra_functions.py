@@ -11,6 +11,8 @@ Functions:
     Projects a given point onto a single half-space.
 - delete_inactive_half_spaces(z, N, c):
     Deletes inactive half-spaces and returns updated matrices.
+- find_optimal_solution(point, N, c, dimensions: int):
+    Computes the projection using QP optimisation (quadprog)
 - beta_check(point, N, c):
     Selects a value of beta based on whether the point lies within the
     intersection of half-spaces.
@@ -32,6 +34,7 @@ def normalise(normal: np.ndarray, offset: np.ndarray) -> tuple:
     Returns:
         tuple: Unit normal vector and normalised offset.
     """
+
     # Obtain normal
     norm = np.linalg.norm(normal)
     if norm == 0:  # me and my homies hate division by 0
@@ -58,8 +61,10 @@ def is_in_half_space(point: np.ndarray, unit_normal: np.ndarray,
     Returns:
         bool: True if point is within the half space, else False.
     """
+
     # Find dot product
     dp = np.dot(point, unit_normal)
+
     # Return boolean
     return dp <= constant_offset
 
@@ -107,6 +112,7 @@ def delete_inactive_half_spaces(z: np.ndarray, N: np.ndarray, c: np.ndarray)\
     Returns:
         tuple: Updated matrix of normal vectors and vector of constant offsets.
     """
+
     # Initialise empty removal mask
     indices_to_remove = np.zeros_like(c, dtype=bool)
 
@@ -127,13 +133,49 @@ def delete_inactive_half_spaces(z: np.ndarray, N: np.ndarray, c: np.ndarray)\
 
 def find_optimal_solution(point: np.ndarray, N: np.ndarray, c: np.ndarray,
                           dimensions: int) -> np.ndarray:
-    # Optimal solution (V4)
-    # if track_error:
-    # FROM DOCUMENTATION:
-    # (see https://scaron.info/blog/quadratic-programming-in-python.html)
-    # " The quadratic expression ∥Ax − b∥^2 of the least squares optimisation
-    #   is written in standard form with P = 2A^TA and q = −2A^Tb "
-    # We are solving min_x ∥x − z∥^2 s.t. Gx <= h so set:
+    """
+    Solves a quadratic programming problem to find the optimal solution that
+    minimizes the Euclidean distance between a given point and a target,
+    subject to linear constraints.
+
+    The function solves the following optimization problem:
+    min_x ∥x − point∥^2 subject to Gx <= h, where G and h represent
+    the constraints.
+
+    Parameters:
+    -----------
+    point : A 1D array representing the target point in space for the
+            optimization.
+
+    N : A 2D array representing the constraint matrix G in the quadratic
+            programming formulation.
+
+    c : A 1D array representing the constraint vector h in the
+            quadratic programming formulation.
+
+    dimensions : The dimensionality of the space in which
+            the optimization is being performed.
+
+    Returns:
+    --------
+    The optimal projection of the point, subject to the constraints,
+    which minimizes the quadratic objective function.
+
+    Notes:
+    ------
+    This function uses the `quadprog_solve_qp` method to solve
+    the quadratic programming problem.
+    The quadratic objective function is reformulated as:
+        min_x ∥Ax − b∥^2
+    where A = identity matrix, b = point, P = 2 * A^T A, and q = −2 * A^T b.
+
+    References:
+    -----------
+    The formulation of this quadratic programming problem is based on the following reference:
+    https://scaron.info/blog/quadratic-programming-in-python.html
+    """
+
+    # Formulate the problem
     A = np.eye(dimensions)
     b = point.copy()
     # @ command is recommended
@@ -141,8 +183,10 @@ def find_optimal_solution(point: np.ndarray, N: np.ndarray, c: np.ndarray,
     q = -2 * np.matmul(A.T, b)
     G = N
     h = c
-    # Find projection
+
+    # Find projection using quadprog
     actual_projection = quadprog_solve_qp(P, q, G, h)
+
     return actual_projection
 
 def beta_check(point: np.ndarray, N: np.ndarray, c: np.ndarray):
