@@ -145,6 +145,7 @@ def plot_half_spaces(Nc_pairs: list, num_of_iterations: int, ax) -> None:
     Returns:
         None
     """
+
     try:
         # Insert global variables for x-y range
         global x_range, y_range
@@ -205,6 +206,7 @@ def plot_path(path: list, ax, errors_for_plotting: np.ndarray=None,
     Returns:
         None
     """
+
     # Extract x and y coordinates from the path
     x_coords = [point[0] for point in path]
     y_coords = [point[1] for point in path]
@@ -215,6 +217,7 @@ def plot_path(path: list, ax, errors_for_plotting: np.ndarray=None,
              label='Projection Path')
 
     # Plot the errors - this is quite complex but follows dykstra's structure
+    # ! Need to fix this implementation at some point
     if plot_errors:
         n = len(errors_for_plotting[0]) # number of halfspaces
         m = 0 # running index (not sure how else to do this)
@@ -265,12 +268,12 @@ def plot_active_spaces(active_spaces: list, num_of_iterations: int) -> None:
         ax_vector[i] = fig.add_subplot(gs[i, :])
 
     # Loop over all axes to plot
-    # ! Need to fix this implementation at some point
     for i, (active_space, ax) in enumerate(zip(active_spaces, ax_vector)):
         ax.plot(iterations, active_space, color='black',
                  label=f'Halfspace {i}', linestyle='-', marker='o')
         ax.set_ylim(0, 1)
         ax.grid(True)
+        ax.legend()
 
     plt.tight_layout()
     plt.show()

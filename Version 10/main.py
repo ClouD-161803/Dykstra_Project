@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-from dykstra_MAP_hybrid import dykstra_projection
+from dykstra import dykstra_projection
 from plotter import plot_half_spaces, plot_path, plot_active_spaces
 from gradient import quadprog_solve_qp
 
@@ -35,16 +35,16 @@ def test_with_tracking() -> None:
     # Exact solution = [0, 1]
 
     # Point very far to the bottom left (stalls)
-    z = np.array([-10, 10])
+    z = np.array([-1.75, 1.75])
 
     # 17 iterations to exit stalling for non-rounded box [-4, 4]
     # after 16 iterations non-rounded box gives approximation of [-0.8  1.4]
     # 47 iterations to exit stalling for non-rounded box [-10, 10]
 
     # Project using Dykstra's algorithm
-    max_iter: int = 15 # number of iterations
+    max_iter: int = 10 # number of iterations
     plot_quivers = True # for plotting error quivers
-    plot_activity = True
+    plot_activity = True # for plotting halfspace activity
     projection, path, error_tuple, errs_to_plot, active_half_spaces = (
         dykstra_projection(z, np.vstack([N_box, N_line]),
                            np.hstack([c_box, c_line]),
