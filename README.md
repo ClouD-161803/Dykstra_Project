@@ -1,7 +1,9 @@
+# Dykstra Project
+
 Project investigating Dykstra's algorithm for Hilbert space projection onto convex sets' intersection.
 
-STRUCTURE:
-
+## STRUCTURE:
+echo "
 |   README.md
 |   structure.txt
 |   
@@ -445,3 +447,4 @@ STRUCTURE:
                 main.cpython-311-pytest-7.4.0.pyc
                 new_dykstra.cpython-311.pyc
                 plotter.cpython-311.pyc
+"
