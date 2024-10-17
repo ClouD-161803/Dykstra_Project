@@ -2,6 +2,9 @@
 
 Project investigating Dykstra's algorithm for Hilbert space projection onto convex sets' intersection.
 
+- LaTeX directory for up-to-date version of the report: /Latex/Current Version
+- Python directory for up-to-date version of the codespace: /Python/Working Version
+
 ## STRUCTURE:
 
 ```markdown
