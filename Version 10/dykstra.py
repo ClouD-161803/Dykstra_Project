@@ -4,9 +4,9 @@ intersection of convex sets (specifically, half-spaces).
 
 Functions:
 - dykstra_projection(z, N, c, max_iter, track_error=False, min_error=1e-3,
-dimensions=2, plot_errors=False, plot_active_halfspaces=False):
-    Projects a point 'z' onto the intersection of multiple half-spaces
-    defined by the matrix N and vector c using dykstra's method.
+                dimensions=2, plot_errors=False, plot_active_halfspaces=False):
+Projects a point 'z' onto the intersection of multiple half-spaces
+defined by the matrix N and vector c using dykstra's method.
 
 Additional Features:
 - Error tracking: Option to track and plot errors at each iteration.
@@ -73,7 +73,7 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
     errors_for_plotting = [e.copy()] # initialise with all zeros
     # print(f"Errors for plotting {errors_for_plotting}") for debugging
 
-    # Path
+    # Path (V3)
     path = [z.copy()]  # Initialize the path with the original point
 
     # Active halfspaces vector (V9)

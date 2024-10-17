@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-from new_dykstra import dykstra_projection
+from dykstra_MAP_hybrid import dykstra_projection
 from plotter import plot_half_spaces, plot_path, plot_active_spaces
 from gradient import quadprog_solve_qp
 

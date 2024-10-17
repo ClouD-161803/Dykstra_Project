@@ -5,9 +5,10 @@ This version can detect stalling and exit it in one iteration.
 
 Functions:
 - dykstra_projection(z, N, c, max_iter, track_error=False, min_error=1e-3,
-        dimensions=2, plot_errors=False, plot_active_halfspaces=False):
-    Projects a point 'z' onto the intersection of multiple half-spaces defined
-    by the matrix N and vector c. Detects stalling and exits it in one iteration
+                dimensions=2, plot_errors=False, plot_active_halfspaces=False):
+Projects a point 'z' onto the intersection of multiple half-spaces defined
+by the matrix N and vector c using a modified version of dykstra that
+detects stalling and exits it in one iteration.
 
 Additional Features:
 - Error tracking: Option to track and plot errors at each iteration.

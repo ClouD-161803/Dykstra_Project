@@ -47,7 +47,7 @@ y_range = [0.5, 2.]
 # y_range = [-2, 1]
 
 def plot_2d_space(N: np.ndarray, c: np.ndarray, X: np.ndarray, Y: np.ndarray,
-                  label: str, cmap: str, ax: object) -> None:
+                  label: str, cmap: str, ax) -> None:
     """
     Plots a 2D region defined by the intersection of half spaces.
 
@@ -92,7 +92,7 @@ def plot_2d_space(N: np.ndarray, c: np.ndarray, X: np.ndarray, Y: np.ndarray,
     ax.plot([], [], color=colour, alpha=0.5, label=label)
 
 
-def plot_1d_space(N: np.ndarray, c: np.ndarray, label: str, cmap: str, ax: object)\
+def plot_1d_space(N: np.ndarray, c: np.ndarray, label: str, cmap: str, ax)\
         -> None:
     """
     Plots a 1D region (line) defined by the intersection of half spaces.
@@ -131,7 +131,7 @@ def plot_1d_space(N: np.ndarray, c: np.ndarray, label: str, cmap: str, ax: objec
         ax.plot(x_line, y_line, linewidth=2, label=label, color=colour)
 
 
-def plot_half_spaces(Nc_pairs: list, num_of_iterations: int, ax: object) -> None:
+def plot_half_spaces(Nc_pairs: list, num_of_iterations: int, ax) -> None:
     """
     Plots the intersection of multiple sets of half-spaces defined by Nc_pairs,
     where each pair consists of N (normals) and c (offsets) such that N*x <= c.
@@ -189,7 +189,7 @@ def plot_half_spaces(Nc_pairs: list, num_of_iterations: int, ax: object) -> None
               f"Check the format of Nc_pairs or the dimensions of N.")
 
 
-def plot_path(path: list, ax: object, errors_for_plotting: np.ndarray=None,
+def plot_path(path: list, ax, errors_for_plotting: np.ndarray=None,
               plot_errors: bool=False) -> None:
     """
     Plots the path followed by Dykstra's algorithm during projection.
@@ -265,6 +265,7 @@ def plot_active_spaces(active_spaces: list, num_of_iterations: int) -> None:
         ax_vector[i] = fig.add_subplot(gs[i, :])
 
     # Loop over all axes to plot
+    # ! Need to fix this implementation at some point
     for i, (active_space, ax) in enumerate(zip(active_spaces, ax_vector)):
         ax.plot(iterations, active_space, color='black',
                  label=f'Halfspace {i}', linestyle='-', marker='o')
