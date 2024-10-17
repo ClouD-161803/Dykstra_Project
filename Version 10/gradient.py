@@ -45,6 +45,7 @@ def quadprog_solve_qp(P: np.ndarray, q: np.ndarray,
     Returns:
         The optimal solution 'x' to the quadratic program.
     """
+
     qp_G = .5 * (P + P.T)   # make sure P is symmetric
     qp_a = -q
     if A is not None:

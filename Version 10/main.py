@@ -4,12 +4,14 @@ import matplotlib.gridspec as gridspec
 from dykstra import dykstra_projection
 from plotter import plot_half_spaces, plot_path, plot_active_spaces
 from gradient import quadprog_solve_qp
+from edge_rounder import rounded_box_constraints
 
 
 def test_with_tracking() -> None:
     """Tests Dykstra's algorithm on the intersection of a box at the origin
     and a line passing through (2, 0) and (0, 1)"""
 
+    # ! Without rounding
     # Define the box constraints (half-spaces) (make sure these are floats)
     N_box = np.array([
         [1., 0.],  # Right side of the box: x <= 1
@@ -22,6 +24,14 @@ def test_with_tracking() -> None:
     # Corner count for rounding
     corner_count = 1
 
+    # # ! With Rounding
+    # # Box centered at the origin with side length 2 and rounded edges
+    # center = (0, 0)
+    # width = 2
+    # height = 2
+    # N_box, c_box = rounded_box_constraints(center, width, height,
+    #                                        corner_count)
+
     # Define the line constraints
     # The line equation is y = 1 - x/2
     # Rearranging to get it in the form N*x <= c:
@@ -29,27 +39,61 @@ def test_with_tracking() -> None:
     N_line = np.array([[1/2, 1], [-1/2, -1]])
     c_line = np.array([1, -1])
 
-    # Point to project (outside the intersection)
-    # z = np.array([-0.75, 1.25])
-    # z = np.array([-1.5, 1.5])
-    # Exact solution = [0, 1]
+    # Point to project and x-y range (uncomment wanted example)
 
-    # Point very far to the bottom left (stalls)
+    # Simple top left - stalling
     z = np.array([-1.75, 1.75])
+    x_range = [-1.8, 0.5]
+    y_range = [0.5, 2.]
+    delete_half_spaces = True
 
-    # 17 iterations to exit stalling for non-rounded box [-4, 4]
-    # after 16 iterations non-rounded box gives approximation of [-0.8  1.4]
-    # 47 iterations to exit stalling for non-rounded box [-10, 10]
+    # # Simple top left - no stalling
+    # z = np.array([-0.75, 1.3])
+    # x_range = [-1.8, 0.5]
+    # y_range = [0.5, 2.]
+    # delete_half_spaces = True
+
+    # # Intersection - no stalling
+    # z = np.array([0.5, 1.75])
+    # x_range = [-2, 2]
+    # y_range = [-2, 2]
+    # delete_half_spaces = True
+
+    # # Very far to the top left
+    # z = np.array([-10, 5])
+    # x_range = [-10, 0.5]
+    # y_range = [0.5, 6]
+    # delete_half_spaces = True
+
+    # # Very far to bottom left
+    # z = np.array([-5, -5])
+    # x_range = [-6, 0.5]
+    # y_range = [-6, 4]
+    # delete_half_spaces = False
+
+    # # Very far to the top right
+    # z = np.array([3.5, 3.5])
+    # x_range = [-1, 4]
+    # y_range = [-1., 4]
+    # delete_half_spaces = True
+
+    # # Very far to the bottom right
+    # z = np.array([10, -5])
+    # x_range = [0, 11]
+    # y_range = [-6, 1]
+    # delete_half_spaces = True
+
 
     # Project using Dykstra's algorithm
     max_iter: int = 10 # number of iterations
-    plot_quivers = True # for plotting error quivers
-    plot_activity = True # for plotting halfspace activity
+    plot_quivers: bool = True # for plotting error quivers
+    plot_activity: bool = True # for plotting halfspace activity
     projection, path, error_tuple, errs_to_plot, active_half_spaces = (
         dykstra_projection(z, np.vstack([N_box, N_line]),
                            np.hstack([c_box, c_line]),
                            max_iter, track_error=True, plot_errors=plot_quivers,
-                           plot_active_halfspaces=plot_activity)
+                           plot_active_halfspaces=plot_activity,
+                           delete_spaces=delete_half_spaces)
     )
 
     # Compare final result to actual projection (V4)
@@ -92,7 +136,7 @@ def test_with_tracking() -> None:
     # Modified everything to accept an axis handle (V4)
 
     # Plot the half spaces
-    plot_half_spaces(Nc_pairs, max_iter, ax1)
+    plot_half_spaces(Nc_pairs, max_iter, ax1, x_range, y_range)
     # Plot the path (V8)
     plot_path(path, ax1, errs_to_plot, plot_errors=plot_quivers)
 

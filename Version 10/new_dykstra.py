@@ -28,9 +28,10 @@ from dykstra_functions import (is_in_half_space,
 
 def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
                        max_iter: int, track_error: bool=False,
-                       min_error: int=1e-3, dimensions: int= 2,
-                       plot_errors: bool = False,
-                       plot_active_halfspaces: bool = False) -> tuple:
+                       min_error: int=1e-3, dimensions: int=2,
+                       plot_errors: bool=False,
+                       plot_active_halfspaces: bool=False,
+                       delete_spaces: bool=False) -> tuple:
     """
     Projects a point 'z' onto the intersection of convex sets (half spaces)
     using a modified version of Dykstra's algorithm.
@@ -46,6 +47,7 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
         dimensions (int, optional): Number of dimensions.
         plot_errors (bool, optional): Plot errors at each iteration.
         plot_active_halfspaces (bool, optional): Plot active half spaces.
+        delete_spaces (optional): Whether to delete inactive halfspaces
 
     Returns:
         tuple: Final projected point, path taken, error metrics (if tracking),
@@ -64,8 +66,10 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
         - Active and inactive half-space plotting.
     """
 
-    # Eliminate inactive halfspaces
-    N, c = delete_inactive_half_spaces(z, N, c)
+    # Eliminate inactive halfspaces (V9)
+    if delete_spaces:
+        N, c = delete_inactive_half_spaces(z, N, c)
+
     # Initialise variables
     n = N.shape[0]  # Number of half-spaces
     x = z.copy()  # create a deep copy of the original point

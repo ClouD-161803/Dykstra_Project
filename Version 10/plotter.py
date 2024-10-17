@@ -35,17 +35,6 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 
 
-# Global variables for x and y range
-# For top left tests
-x_range = [-1.8, 0.5]
-y_range = [0.5, 2.]
-# These are to test sets with a global view
-# x_range = [-2, 2]
-# y_range = [-2, 2]
-# For bottom right tests
-# x_range = [0, 4]
-# y_range = [-2, 1]
-
 def plot_2d_space(N: np.ndarray, c: np.ndarray, X: np.ndarray, Y: np.ndarray,
                   label: str, cmap: str, ax) -> None:
     """
@@ -92,8 +81,8 @@ def plot_2d_space(N: np.ndarray, c: np.ndarray, X: np.ndarray, Y: np.ndarray,
     ax.plot([], [], color=colour, alpha=0.5, label=label)
 
 
-def plot_1d_space(N: np.ndarray, c: np.ndarray, label: str, cmap: str, ax)\
-        -> None:
+def plot_1d_space(N: np.ndarray, c: np.ndarray, label: str, cmap: str, ax,
+                  x_range: list)-> None:
     """
     Plots a 1D region (line) defined by the intersection of half spaces.
 
@@ -107,9 +96,6 @@ def plot_1d_space(N: np.ndarray, c: np.ndarray, label: str, cmap: str, ax)\
     Returns:
         None
     """
-
-    # Insert global variables for x-y range
-    global x_range
 
     # Colours
     colourmap = cm.get_cmap(cmap)
@@ -131,7 +117,8 @@ def plot_1d_space(N: np.ndarray, c: np.ndarray, label: str, cmap: str, ax)\
         ax.plot(x_line, y_line, linewidth=2, label=label, color=colour)
 
 
-def plot_half_spaces(Nc_pairs: list, num_of_iterations: int, ax) -> None:
+def plot_half_spaces(Nc_pairs: list, num_of_iterations: int, ax,
+                     x_range: list, y_range: list) -> None:
     """
     Plots the intersection of multiple sets of half-spaces defined by Nc_pairs,
     where each pair consists of N (normals) and c (offsets) such that N*x <= c.
@@ -147,8 +134,8 @@ def plot_half_spaces(Nc_pairs: list, num_of_iterations: int, ax) -> None:
     """
 
     try:
-        # Insert global variables for x-y range
-        global x_range, y_range
+        # # Insert global variables for x-y range
+        # global x_range, y_range
 
         # Create a grid of x and y values
         x = np.linspace(x_range[0], x_range[1], 500)  # Adjust range as needed
@@ -160,7 +147,7 @@ def plot_half_spaces(Nc_pairs: list, num_of_iterations: int, ax) -> None:
             rank = np.linalg.matrix_rank(N)
             # 1d case (line)
             if rank == 1:
-                plot_1d_space(N, c, label, cmap, ax)
+                plot_1d_space(N, c, label, cmap, ax, x_range)
             # 2d case
             elif rank == 2:
                 plot_2d_space(N, c, X, Y, label, cmap, ax)

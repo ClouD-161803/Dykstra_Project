@@ -25,9 +25,10 @@ from dykstra_functions import (is_in_half_space,
 
 def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
                        max_iter: int, track_error: bool=False,
-                       min_error: int=1e-3, dimensions: int= 2,
-                       plot_errors: bool = False,
-                       plot_active_halfspaces: bool = False) -> tuple:
+                       min_error: int=1e-3, dimensions: int=2,
+                       plot_errors: bool=False,
+                       plot_active_halfspaces: bool=False,
+                       delete_spaces: bool=False) -> tuple:
     """Projects a point 'z' onto the intersection of convex sets H_i (half spaces).
     The convex set parameters (unit normals and constant offsets) are packaged
     into matrix N and vector c respectively, such that:
@@ -53,6 +54,7 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
         dimensions (optional): Number of dimensions.
         plot_errors (optional): Whether to plot errors at each iteration.
         plot_active_halfspaces (optional): Whether to plot active half spaces.
+        delete_spaces (optional): Whether to delete inactive halfspaces
 
     Returns:
         tuple: Final projected point, path taken, error metrics if tracking,
@@ -60,7 +62,8 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
 
 
     # Eliminate inactive halfspaces (V9)
-    N, c = delete_inactive_half_spaces(z, N, c)
+    if delete_spaces:
+        N, c = delete_inactive_half_spaces(z, N, c)
 
     # Initialise variables
     n = N.shape[0]  # Number of half-spaces
