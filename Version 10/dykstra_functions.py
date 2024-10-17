@@ -1,4 +1,24 @@
+"""
+This module implements Dykstra's algorithm for projecting a point onto the
+intersection of convex sets (specifically, half-spaces).
+
+Functions:
+- normalise(normal, offset):
+    Normalises half space normal and constant offset.
+- is_in_half_space(point, unit_normal, constant_offset):
+    Checks if a point lies within a single half-space.
+- project_onto_half_space(point, normal, offset):
+    Projects a given point onto a single half-space.
+- delete_inactive_half_spaces(z, N, c):
+    Deletes inactive half-spaces and returns updated matrices.
+- beta_check(point, N, c):
+    Selects a value of beta based on whether the point lies within the
+    intersection of half-spaces.
+"""
+
+
 import numpy as np
+from gradient import quadprog_solve_qp # needed to track error (V4)
 
 
 def normalise(normal: np.ndarray, offset: np.ndarray) -> tuple:
@@ -104,6 +124,26 @@ def delete_inactive_half_spaces(z: np.ndarray, N: np.ndarray, c: np.ndarray)\
 
     return new_N, new_c
 
+
+def find_optimal_solution(point: np.ndarray, N: np.ndarray, c: np.ndarray,
+                          dimensions: int) -> np.ndarray:
+    # Optimal solution (V4)
+    # if track_error:
+    # FROM DOCUMENTATION:
+    # (see https://scaron.info/blog/quadratic-programming-in-python.html)
+    # " The quadratic expression ∥Ax − b∥^2 of the least squares optimisation
+    #   is written in standard form with P = 2A^TA and q = −2A^Tb "
+    # We are solving min_x ∥x − z∥^2 s.t. Gx <= h so set:
+    A = np.eye(dimensions)
+    b = point.copy()
+    # @ command is recommended
+    P = 2 * np.matmul(A.T, A)
+    q = -2 * np.matmul(A.T, b)
+    G = N
+    h = c
+    # Find projection
+    actual_projection = quadprog_solve_qp(P, q, G, h)
+    return actual_projection
 
 def beta_check(point: np.ndarray, N: np.ndarray, c: np.ndarray):
     """

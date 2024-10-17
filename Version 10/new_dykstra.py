@@ -4,14 +4,6 @@ a point onto the intersection of convex sets (specifically, half-spaces).
 This version can detect stalling and exit it in one iteration.
 
 Functions:
-- normalise(normal, offset):
-    Normalises half space normal and constant offset.
-- is_in_half_space(point, unit_normal, constant_offset):
-    Checks if a point lies within a single half-space.
-- project_onto_half_space(point, normal, offset):
-    Projects a given point onto a single half-space.
-- delete_inactive_half_spaces(z, N, c):
-    Deletes inactive half-spaces and returns updated matrices.
 - dykstra_projection(z, N, c, max_iter, track_error=False, min_error=1e-3,
         dimensions=2, plot_errors=False, plot_active_halfspaces=False):
     Projects a point 'z' onto the intersection of multiple half-spaces defined
@@ -27,10 +19,10 @@ Additional Features:
 
 
 import numpy as np
-from gradient import quadprog_solve_qp # needed to track error (V4)
 from dykstra_functions import (is_in_half_space,
                                project_onto_half_space,
-                               delete_inactive_half_spaces)
+                               delete_inactive_half_spaces,
+                               find_optimal_solution)
 
 
 def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
@@ -98,21 +90,7 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
     x_historical = [[np.zeros_like(z) for _ in range(n)] for _ in range(max_iter)]
 
     # Optimal solution (V4)
-    # if track_error:
-    # FROM DOCUMENTATION:
-    # (see https://scaron.info/blog/quadratic-programming-in-python.html)
-    # " The quadratic expression ∥Ax − b∥^2 of the least squares optimisation
-    #   is written in standard form with P = 2A^TA and q = −2A^Tb "
-    # We are solving min_x ∥x − z∥^2 s.t. Gx <= h so set:
-    A = np.eye(dimensions)
-    b = z.copy()
-    # @ command is recommended
-    P = 2 * np.matmul(A.T, A)
-    q = -2 * np.matmul(A.T, b)
-    G = N
-    h = c
-    # Find projection
-    actual_projection = quadprog_solve_qp(P, q, G, h)
+    actual_projection = find_optimal_solution(z, N, c, dimensions)
     # Initialise errors vector
     squared_errors = np.zeros(max_iter)
     # Initialise vectors for tracking stalling and convergence
