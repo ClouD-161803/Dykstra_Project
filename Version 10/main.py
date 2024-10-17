@@ -39,45 +39,46 @@ def test_with_tracking() -> None:
     N_line = np.array([[1/2, 1], [-1/2, -1]])
     c_line = np.array([1, -1])
 
+
     # Point to project and x-y range (uncomment wanted example)
 
-    # Simple top left - stalling
+    # Simple top left - stalling - y y y
     z = np.array([-1.75, 1.75])
     x_range = [-1.8, 0.5]
     y_range = [0.5, 2.]
     delete_half_spaces = True
 
-    # # Simple top left - no stalling
+    # # Simple top left - no stalling - y y y
     # z = np.array([-0.75, 1.3])
     # x_range = [-1.8, 0.5]
     # y_range = [0.5, 2.]
     # delete_half_spaces = True
 
-    # # Intersection - no stalling
+    # # Intersection - no stalling - y y n
     # z = np.array([0.5, 1.75])
     # x_range = [-2, 2]
     # y_range = [-2, 2]
     # delete_half_spaces = True
 
-    # # Very far to the top left
+    # # Very far to the top left - y n y
     # z = np.array([-10, 5])
     # x_range = [-10, 0.5]
     # y_range = [0.5, 6]
     # delete_half_spaces = True
 
-    # # Very far to bottom left
+    # # Very far to bottom left - n y y
     # z = np.array([-5, -5])
     # x_range = [-6, 0.5]
     # y_range = [-6, 4]
     # delete_half_spaces = False
 
-    # # Very far to the top right
+    # # Very far to the top right y y n
     # z = np.array([3.5, 3.5])
     # x_range = [-1, 4]
     # y_range = [-1., 4]
     # delete_half_spaces = True
 
-    # # Very far to the bottom right
+    # # Very far to the bottom right - y n y
     # z = np.array([10, -5])
     # x_range = [0, 11]
     # y_range = [-6, 1]
