@@ -44,13 +44,14 @@ Project investigating Dykstra's algorithm for Hilbert space projection onto conv
 |           C21_MPC_Lecture_Notes.pdf
 |           C21_MPC_Problems.pdf
 |           dykstra.pdf
+|           Dykstra's Projection Algorithm.pdf
+|           LQR + Riccati.pdf
+|           MPC derivation of condensed form.pdf
 |           
 +---Latex
 |   +---Current Version
 |   |       0041555367901139.bib
 |   |       DifferentSequences.png
-|   |       Dykstra's Projection Algorithm.pdf
-|   |       dykstra.pdf
 |   |       dykstra.tex
 |   |       dykstra.zip
 |   |       dykstra_algorithm.py
@@ -61,14 +62,12 @@ Project investigating Dykstra's algorithm for Hilbert space projection onto conv
 |   |       in_intersection_dykstra.png
 |   |       in_intersection_MAP.png
 |   |       in_intersection_modified.png
-|   |       LQR + Riccati.pdf
 |   |       main.tex
 |   |       MAP_demonstration.png
 |   |       MAP_one_corner.png
 |   |       MAP_wiki.png
 |   |       master_bib_abbrev.bib
 |   |       master_bib_abbrev.bib.bak
-|   |       MPC derivation of condensed form.pdf
 |   |       mymath.sty
 |   |       non_rounded_test.png
 |   |       not_in_intersection_dykstra.png
