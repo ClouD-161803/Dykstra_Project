@@ -11,33 +11,12 @@ Project investigating Dykstra's algorithm for Hilbert space projection onto conv
 |   README.md
 |   structure.txt
 |   
-+---.idea
-|   |   .gitignore
-|   |   Dykstra.iml
-|   |   misc.xml
-|   |   modules.xml
-|   |   vcs.xml
-|   |   workspace.xml
-|   |   
-|   \---inspectionProfiles
-|           profiles_settings.xml
-|           Project_Default.xml
-|           
+|
 +---Application
-|   |   A Convergence Analysis of Dykstra's Algorithm for Polyhedral Sets.pdf
-|   |   EUROP Sample Application.docx
-|   |   EUROP Sample Application.pdf
-|   |   EUROP Student Guidance 2023-24.pdf
-|   |   Fast Gradient Method.pdf
-|   |   Model_Predictive_Control_for_Electron_Beam_Stabilization_in_a_Synchrotron.pdf
-|   |   On Dykstra’s algorithm_ finite convergence, stalling, and the method of alternating projections journal.pdf
-|   |   slides_claudio.pdf
-|   |   Student_sheets.pdf
+|   |   ...
 |   |   
 |   \---Final Drafts
-|           EUROP Application - Claudio Vestini.docx
-|           EUROP Application - Claudio Vestini.pdf
-|           Modified EUROP Application - Claudio Vestini.docx
+|           ...
 |           
 +---Books & Articles
 |   |   A Convergence Analysis of Dykstra's Algorithm for Polyhedral Sets.pdf
@@ -108,10 +87,7 @@ Project investigating Dykstra's algorithm for Hilbert space projection onto conv
 |       |   ...
 |       |   
 |       \---miscellaneous
-|               Dykstra_Algorithm_notes.pdf
-|               Dykstra_Algorithm___rough.pdf
-|               error_visualisation.png
-|               test.png
+|               ...
 |               
 \---Python
     +---Previous Versions
@@ -126,26 +102,4 @@ Project investigating Dykstra's algorithm for Hilbert space projection onto conv
         |   main.py
         |   new_dykstra.py
         |   plotter.py
-        |   
-        +---.idea
-        |   |   .gitignore
-        |   |   misc.xml
-        |   |   modules.xml
-        |   |   vcs.xml
-        |   |   Working Version.iml
-        |   |   workspace.xml
-        |   |   
-        |   \---inspectionProfiles
-        |           profiles_settings.xml
-        |           Project_Default.xml
-        |           
-        +---.pytest_cache
-        |   |   ...
-        |   |   
-        |   \---v
-        |       \---cache
-        |               ...
-        |               
-        \---__pycache__
-                ...
 "
