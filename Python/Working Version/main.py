@@ -42,11 +42,11 @@ def test_with_tracking() -> None:
 
     # Point to project and x-y range (uncomment wanted example)
 
-    # # Simple top left - stalling - y y y
-    # z = np.array([-1.75, 1.75])
-    # x_range = [-1.8, 0.5]
-    # y_range = [0.5, 2.]
-    # delete_half_spaces = True
+    # Simple top left - stalling - y y y
+    z = np.array([-2., 1.4])
+    x_range = [-2.5, 0.5]
+    y_range = [0.5, 2.25]
+    delete_half_spaces = True
 
     # # Simple top left - no stalling - y y y
     # z = np.array([-0.75, 1.3])
@@ -60,11 +60,11 @@ def test_with_tracking() -> None:
     # y_range = [-2, 2]
     # delete_half_spaces = True
 
-    # Very far to the top left - y n y
-    z = np.array([-10, 5])
-    x_range = [-10, 0.5]
-    y_range = [0.5, 6]
-    delete_half_spaces = True
+    # # Very far to the top left - y n y
+    # z = np.array([-10, 5])
+    # x_range = [-10, 0.5]
+    # y_range = [0.5, 6]
+    # delete_half_spaces = True
 
     # # Very far to bottom left - n y y
     # z = np.array([-5, -5])
@@ -86,8 +86,8 @@ def test_with_tracking() -> None:
 
 
     # Project using Dykstra's algorithm
-    max_iter: int = 100 # number of iterations
-    plot_quivers: bool = False # for plotting error quivers
+    max_iter: int = 25 # number of iterations
+    plot_quivers: bool = True # for plotting error quivers
     plot_activity: bool = True # for plotting halfspace activity
     projection, path, error_tuple, errs_to_plot, active_half_spaces = (
         dykstra_projection(z, np.vstack([N_box, N_line]),
