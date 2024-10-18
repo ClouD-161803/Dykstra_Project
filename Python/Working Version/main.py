@@ -11,7 +11,7 @@ def test_with_tracking() -> None:
     """Tests Dykstra's algorithm on the intersection of a box at the origin
     and a line passing through (2, 0) and (0, 1)"""
 
-    # ! Without rounding
+    # * Without rounding
     # Define the box constraints (half-spaces) (make sure these are floats)
     N_box = np.array([
         [1., 0.],  # Right side of the box: x <= 1
@@ -24,7 +24,7 @@ def test_with_tracking() -> None:
     # Corner count for rounding
     corner_count = 1
 
-    # # ! With Rounding
+    # # * With Rounding
     # # Box centered at the origin with side length 2 and rounded edges
     # center = (0, 0)
     # width = 2
