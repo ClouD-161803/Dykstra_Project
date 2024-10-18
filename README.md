@@ -10,8 +10,6 @@ Project completed in 2nd Year and funded by Keble Research Grant
 
 ```markdown
 |   README.md
-|   structure.txt
-|   
 |
 +---Application
 |   |   ...
