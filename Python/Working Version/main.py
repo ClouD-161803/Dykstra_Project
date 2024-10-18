@@ -42,11 +42,11 @@ def test_with_tracking() -> None:
 
     # Point to project and x-y range (uncomment wanted example)
 
-    # Simple top left - stalling - y y y
-    z = np.array([-1.75, 1.75])
-    x_range = [-1.8, 0.5]
-    y_range = [0.5, 2.]
-    delete_half_spaces = True
+    # # Simple top left - stalling - y y y
+    # z = np.array([-1.75, 1.75])
+    # x_range = [-1.8, 0.5]
+    # y_range = [0.5, 2.]
+    # delete_half_spaces = True
 
     # # Simple top left - no stalling - y y y
     # z = np.array([-0.75, 1.3])
@@ -60,11 +60,11 @@ def test_with_tracking() -> None:
     # y_range = [-2, 2]
     # delete_half_spaces = True
 
-    # # Very far to the top left - y n y
-    # z = np.array([-10, 5])
-    # x_range = [-10, 0.5]
-    # y_range = [0.5, 6]
-    # delete_half_spaces = True
+    # Very far to the top left - y n y
+    z = np.array([-10, 5])
+    x_range = [-10, 0.5]
+    y_range = [0.5, 6]
+    delete_half_spaces = True
 
     # # Very far to bottom left - n y y
     # z = np.array([-5, -5])
@@ -86,8 +86,8 @@ def test_with_tracking() -> None:
 
 
     # Project using Dykstra's algorithm
-    max_iter: int = 10 # number of iterations
-    plot_quivers: bool = True # for plotting error quivers
+    max_iter: int = 100 # number of iterations
+    plot_quivers: bool = False # for plotting error quivers
     plot_activity: bool = True # for plotting halfspace activity
     projection, path, error_tuple, errs_to_plot, active_half_spaces = (
         dykstra_projection(z, np.vstack([N_box, N_line]),
@@ -121,12 +121,12 @@ def test_with_tracking() -> None:
         f"{projection};\nThe distance to the optimal solution is: "
         f"{distance}\nThe squared-error is {np.dot(distance, distance)}\n")
 
-    # Create infrastructure for two plots (V4)
-    fig = plt.figure(figsize=(8, 10))  # Create the figure
+    # Create infrastructure for plots
+    fig = plt.figure(figsize=(16, 10))  # Create the figure
     # This makes the first plot larger
-    gs = gridspec.GridSpec(3, 1)  # 3 rows, 1 column
-    ax1 = fig.add_subplot(gs[:2, :])  # First subplot spans the top two rows
-    ax2 = fig.add_subplot(gs[2, :])  # Second subplot occupies the bottom row
+    gs = gridspec.GridSpec(3, 2)  # 3 rows, 2 columns
+    ax1 = fig.add_subplot(gs[:2, 0])  # First subplot spans the top two rows of first column
+    ax2 = fig.add_subplot(gs[2, 0])  # Second subplot occupies the bottom row of first column
 
     # Visualize the results
     Nc_pairs = [
@@ -175,15 +175,15 @@ def test_with_tracking() -> None:
     ax2.grid(True)
     ax2.legend()
 
+    # Plot active halfspaces
+    if plot_activity:
+        # print(active_half_spaces[0])
+        plot_active_spaces(active_half_spaces, max_iter, fig, gs)
+
     # Show the plot
     plt.subplots_adjust(hspace=0.3)
     plt.tight_layout()
     plt.show()
-
-    # Plot active halfspaces
-    if plot_activity:
-        # print(active_half_spaces[0])
-        plot_active_spaces(active_half_spaces, max_iter)
 
     # Debugging info
     # print(errs_to_plot)

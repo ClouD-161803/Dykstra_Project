@@ -2,10 +2,6 @@
 This module provides functions for visualizing the intersection of
 half-spaces in 1D and 2D.
 
-Global Variables:
-- x_range: Range for x-axis in plots.
-- y_range: Range for y-axis in plots.
-
 Functions:
 - plot_2d_space(N, c, X, Y, label, cmap, ax):
     Plots a 2D region defined by the intersection of half-spaces.
@@ -134,8 +130,6 @@ def plot_half_spaces(Nc_pairs: list, num_of_iterations: int, ax,
     """
 
     try:
-        # # Insert global variables for x-y range
-        # global x_range, y_range
 
         # Create a grid of x and y values
         x = np.linspace(x_range[0], x_range[1], 500)  # Adjust range as needed
@@ -204,7 +198,7 @@ def plot_path(path: list, ax, errors_for_plotting: np.ndarray=None,
              label='Projection Path')
 
     # Plot the errors - this is quite complex but follows dykstra's structure
-    # ! Need to fix this implementation at some point
+    # TODO Need to fix this implementation at some point
     if plot_errors:
         n = len(errors_for_plotting[0]) # number of halfspaces
         m = 0 # running index (not sure how else to do this)
@@ -228,39 +222,41 @@ def plot_path(path: list, ax, errors_for_plotting: np.ndarray=None,
     ax.legend()
 
 
-def plot_active_spaces(active_spaces: list, num_of_iterations: int) -> None:
+def plot_active_spaces(active_spaces: list, num_of_iterations: int, fig, gs) -> None:
     """
         Plots the activity of half-spaces over iterations.
 
         Args:
             active_spaces: List of active spaces.
             num_of_iterations: Number of iterations.
+            fig: Figure handle for plotting.
+            gs: GridSpec handle for plotting.
 
         Returns:
             None
     """
-    import matplotlib.gridspec as gridspec
-
 
     # Find total number of halfspaces
     num_of_spaces = len(active_spaces)
     iterations = np.arange(0, num_of_iterations, 1) # for plotting
-    # Create figure and axis objects
-    fig = plt.figure(figsize=(8, 10))  # Create the figure
-    gs = gridspec.GridSpec(num_of_spaces, 1)  # n rows, 1 column
     ax_vector = np.zeros(num_of_spaces, dtype=object) # initialise vector
 
     # Update axes
     for i, active_space in enumerate(active_spaces):
-        ax_vector[i] = fig.add_subplot(gs[i, :])
+        ax_vector[i] = fig.add_subplot(gs[i, 1])
 
     # Loop over all axes to plot
     for i, (active_space, ax) in enumerate(zip(active_spaces, ax_vector)):
+
+        # Plot each halfspace on a separate axis
         ax.plot(iterations, active_space, color='black',
                  label=f'Halfspace {i}', linestyle='-', marker='o')
         ax.set_ylim(0, 1)
+
+        # Set title for the first plot
+        if i == 0:
+            ax.set_title('Halfspace Activity')
+        
+        # Grid and legend
         ax.grid(True)
         ax.legend()
-
-    plt.tight_layout()
-    plt.show()
