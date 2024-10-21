@@ -55,7 +55,8 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
 
 
     # # Eliminate inactive halfspaces (V9)
-    # N, c = delete_inactive_half_spaces(z, N, c)
+    if delete_spaces:
+        N, c = delete_inactive_half_spaces(z, N, c)
 
     # Initialise variables
     # print(f"\nThere are {N.shape[0]} halfspaces or N is {N}") # for debug

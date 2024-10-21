@@ -11,7 +11,7 @@ def test_with_tracking() -> None:
     """Tests Dykstra's algorithm on the intersection of a box at the origin
     and a line passing through (2, 0) and (0, 1)"""
 
-    # * Without rounding
+    # # * Without rounding
     # Define the box constraints (half-spaces) (make sure these are floats)
     N_box = np.array([
         [1., 0.],  # Right side of the box: x <= 1
@@ -42,11 +42,11 @@ def test_with_tracking() -> None:
 
     # Point to project and x-y range (uncomment wanted example)
 
-    # # Simple top left - stalling - y y y
-    # z = np.array([-2., 1.4])
-    # x_range = [-2.5, 0.5]
-    # y_range = [0.5, 2.25]
-    # delete_half_spaces = True
+    # Simple top left - stalling - y y y
+    z = np.array([-2., 1.4])
+    x_range = [-2.5, 0.5]
+    y_range = [0.5, 2.25]
+    delete_half_spaces = True
 
     # # Simple top left - no stalling - y y y
     # z = np.array([-0.75, 1.3])
@@ -72,11 +72,11 @@ def test_with_tracking() -> None:
     # y_range = [-6, 4]
     # delete_half_spaces = False
 
-    # Very far to the top right y y n
-    z = np.array([3.5, 3.5])
-    x_range = [-1, 4]
-    y_range = [-1., 4]
-    delete_half_spaces = True
+    # # Very far to the top right y y n
+    # z = np.array([3.5, 3.5])
+    # x_range = [-1, 4]
+    # y_range = [-1., 4]
+    # delete_half_spaces = True
 
     # # Very far to the bottom right - y n y
     # z = np.array([10, -5])
@@ -177,7 +177,6 @@ def test_with_tracking() -> None:
 
     # Plot active halfspaces
     if plot_activity:
-        # print(active_half_spaces[0])
         plot_active_spaces(active_half_spaces, max_iter, fig, gs)
 
     # Show the plot

@@ -111,7 +111,7 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
             x = project_onto_half_space(x_temp + e[index], normal, offset)
 
             # Update e_m
-            e[m] =  + e[index] + 1 * (x_temp - x) # change to 0 for MAP
+            e[m] =  + e[index] + 1 * (x_temp - x) # change 1 to 0 for MAP
 
             # Path
             path.append(x.copy())  # Add the updated x to the path

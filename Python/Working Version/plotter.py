@@ -156,7 +156,7 @@ def plot_half_spaces(Nc_pairs: list, num_of_iterations: int, ax,
         # Add labels and title
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
-        ax.set_title(f"Modified Dykstra's algorithm "
+        ax.set_title(f"Dykstra's' algorithm "
                      f"executed for {num_of_iterations} iterations")
         ax.grid(True)
 
