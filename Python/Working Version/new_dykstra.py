@@ -146,6 +146,11 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
             if stalling:
                 # Constant growth error
                 diff = x_historical[i][m] - x_historical[i][m - 1]
+                # Need to continue if this half-space cannot become inactive
+                tmp = diff / normal
+                diff_sign = tmp[np.isfinite(tmp)][0]
+                if diff_sign > 0:
+                    continue
                 k = 0
                 # Iterate until boundary is crossed
                 while not is_in_half_space(x_temp + k*diff, normal, offset):
