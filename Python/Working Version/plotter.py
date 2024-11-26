@@ -202,11 +202,11 @@ def plot_path(path: list, ax, errors_for_plotting: np.ndarray=None,
              color='blue', linewidth=0.5, markersize=1,
              label='Projection Path')
     n = len(errors_for_plotting[0]) # number of halfspaces
-    n_coords = len(x_coords)
-    print(active_half_spaces)
-    for i in range(n_coords):
-        if i>0 and (i % n-1 == 0):
-            ax.plot(x_coords[i], y_coords[i], color='red', markersize='2', marker='x')
+    # n_coords = len(x_coords)
+    # print(active_half_spaces)
+    # for i in range(n_coords):
+    #     if i>0 and (i % n-1 == 0):
+    #         ax.plot(x_coords[i], y_coords[i], color='red', markersize='2', marker='x')
 
     # Plot the errors - this is quite complex but follows dykstra's structure
     # TODO Need to fix this implementation at some point

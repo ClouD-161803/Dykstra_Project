@@ -122,6 +122,12 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
                      if np.dot(x_historical[i-1][m-1], normal) < offset else 1e6
                      for m, (normal, offset) in enumerate(zip(N, c))]
                 ))
+                n_fast_forward -= 1
+                # NOTE: There still seems to be a bug here. Swap the order of line and box, and then it becomes visible
+                # that in one situation I have to substract 1 from n_fast_forward, and in the other it is fine as it is.
+                # This is most probably related to some bug in how em is updated during the stalling period. To
+                # simplify all of this, the stalling check could occur in the range(max_iter) loop, checking if all
+                # half-spaces are stalling. Then, the fast forwarding could be applied here.
                 print(f"Fast forwarding {n_fast_forward} rounds to exit stalling at iteration {i}. ")
                 # Update all errors for the following round
                 for m, (normal, offset) in enumerate(zip(N, c)):
