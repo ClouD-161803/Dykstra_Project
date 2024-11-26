@@ -82,8 +82,8 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
     errors_for_plotting = np.array([np.zeros_like(e) for _ in range(max_iter)])
     # print(f"Errors for plotting {errors_for_plotting}") # for debugging
 
-    # Path
-    path = [z.copy()]  # Initialize the path with the original point
+    # # Path
+    # path = [z.copy()]  # Initialize the path with the original point
 
     # Active halfspaces matrix  (V9)
     # if plot_active_halfspaces:
@@ -162,8 +162,11 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
                 # Update x
                 x = x_temp + k * diff
 
-            # Path
-            path.append(x.copy())  # Add the updated x to the path
+            # # Path
+            # path.append(x.copy())  # Add the updated x to the path
+
+        # Path
+        path = x_historical.copy()
 
         # Errors
         if plot_errors:
