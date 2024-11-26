@@ -29,7 +29,8 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
                        plot_errors: bool=False,
                        plot_active_halfspaces: bool=False,
                        delete_spaces: bool=False) -> tuple:
-    """Projects a point 'z' onto the intersection of convex sets H_i (half spaces).
+    """
+    Projects a point 'z' onto the intersection of convex sets H_i (half spaces).
     The convex set parameters (unit normals and constant offsets) are packaged
     into matrix N and vector c respectively, such that:
     N*x <= c -> [n_i^T]*x <= {c_i} yields a set of linear inequalities of the kind
@@ -58,7 +59,8 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
 
     Returns:
         tuple: Final projected point, path taken, error metrics if tracking,
-        errors for plotting if selected, and active half spaces if selected."""
+        errors for plotting if selected, and active half spaces if selected.
+    """
 
 
     # Eliminate inactive halfspaces (V9)
@@ -76,10 +78,9 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
     errors_for_plotting = np.array([np.zeros_like(e) for _ in range(max_iter)])
     # print(f"Errors for plotting {errors_for_plotting}") for debugging
 
-    # Path (V3)
-    # path = [z.copy()]  # Initialize the path with the original point
     # Matrix of successive projections
-    x_historical = np.array([[np.zeros_like(z) for _ in range(n)] for _ in range(max_iter)])
+    x_historical = np.array([[np.zeros_like(z) for _ in range(n)]
+                             for _ in range(max_iter)])
 
     # Active halfspaces vector (V9)
     # if plot_active_halfspaces:
@@ -117,11 +118,10 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
 
             # Path
             x_historical[i][m] = x.copy()
-            # path.append(x.copy())  # Add the updated x to the path
 
             # Errors
             if plot_errors:
-                errors_for_plotting[i][m] = e[m].copy() # update error matrix
+                errors_for_plotting[i][m] = e[m].copy()
 
         # Track the squared error (V4)
         if track_error:
