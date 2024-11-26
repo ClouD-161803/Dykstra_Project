@@ -165,13 +165,10 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
             # # Path
             # path.append(x.copy())  # Add the updated x to the path
 
-        # Path
-        path = x_historical.copy()
-
-        # Errors
-        if plot_errors:
-            errors_for_plotting[i][m] = e[m].copy() # update error matrix
-            # print(f"Errors for plotting {errors_for_plotting}") # for debugging
+            # Errors
+            if plot_errors:
+                errors_for_plotting[i][m] = e[m].copy() # update error matrix
+                # print(f"Errors for plotting {errors_for_plotting}") # for debugging
 
         # Track the squared error (V4)
         if track_error:
@@ -195,6 +192,9 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
                 converged_errors[i] = None
             # Append error
             squared_errors[i] = error
+
+     # Path
+    path = x_historical.copy()
 
     if track_error and plot_errors and plot_active_halfspaces:
         error_tuple = (squared_errors, stalled_errors, converged_errors)
