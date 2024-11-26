@@ -197,26 +197,37 @@ def plot_path(path: list, ax, errors_for_plotting: np.ndarray=None,
              color='blue', linewidth=0.5, markersize=1,
              label='Projection Path')
 
-    # Plot the errors - this is quite complex but follows dykstra's structure
+    # Plot the errors (quivers)
     # TODO Need to fix this implementation at some point
     if plot_errors:
-        n = len(errors_for_plotting[0]) # number of halfspaces
-        m = 0 # running index (not sure how else to do this)
-        max_iter = len(errors_for_plotting) - 1 # algorithm iterations
+        n = errors_for_plotting.shape[1]  # number of halfspaces
+        max_iter = errors_for_plotting.shape[0]  # algorithm iterations
         iteration = 1 # external for loop iterations
+        m = 0
         for errors in errors_for_plotting:
             for error in errors:
                 index = (m - n) % (iteration * n) + n
                 if index < max_iter * n:
                     # debugging prints
-                    # print(f"n: {n} | m: {m} | index: {index} | iteration: {iteration}")
-                    # print(index, (x_coords[index], y_coords[index]), error)
+                    print(f"n: {n} | m: {m} | index: {index} | iteration: {iteration}")
+                    print(index, (x_coords[index], y_coords[index]), error)
 
                     # Plot error vectors as quivers
                     ax.quiver(x_coords[index], y_coords[index], error[0], error[1],
                               angles='xy', scale_units='xy', scale=1, alpha=0.3)
                     m += 1
             iteration += 1
+
+    # if plot_errors and errors_for_plotting is not None:
+    #     n = errors_for_plotting.shape[0]  # number of halfspaces
+    #     max_iter = errors_for_plotting.shape[1]  # algorithm iterations
+    #     for i in range(max_iter):
+    #         for m in range(n):
+    #             index = (m - n) % n
+    #             error = errors_for_plotting[m, i]
+    #             ax.quiver(x_coords[index], y_coords[index], error[0], error[1],
+    #                       angles='xy', scale_units='xy', scale=1, alpha=0.3)
+
 
     # Add legend
     ax.legend()

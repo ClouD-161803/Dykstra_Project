@@ -78,21 +78,25 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
 
     # Vector for storing all errors (V8)
     # if plot_errors:
-    errors_for_plotting = [e.copy()] # initialise with all zeros
-    # print(f"Errors for plotting {errors_for_plotting}") for debugging
+    # errors_for_plotting = [e.copy()] # initialise with all zeros
+    errors_for_plotting = np.array([np.zeros_like(e) for _ in range(max_iter)])
+    # print(f"Errors for plotting {errors_for_plotting}") # for debugging
 
     # Path
     path = [z.copy()]  # Initialize the path with the original point
 
     # Active halfspaces matrix  (V9)
     # if plot_active_halfspaces:
-    active_half_spaces = [[np.zeros_like(n) for _ in range(max_iter)]
-                            for _ in range(n)]
+    active_half_spaces = np.array([[np.zeros_like(n) for _ in range(max_iter)]
+                            for _ in range(n)])
 
     # Stall check (V9)
     stalling = False # initialise boolean
     # Matrix of successive projections
-    x_historical = [[np.zeros_like(z) for _ in range(n)] for _ in range(max_iter)]
+    x_historical = np.array([[np.zeros_like(z) for _ in range(n)] for _ in range(max_iter)])
+    # print(f"x_historical: {x_historical}") # for debugging
+    # print((np.array(x_historical).shape)) # for debugging
+    # print((np.array(errors_for_plotting).shape)) # for debugging
 
     # Optimal solution (V4)
     actual_projection = find_optimal_solution(z, N, c, dimensions)
@@ -163,7 +167,8 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
 
         # Errors
         if plot_errors:
-            errors_for_plotting.append(e.copy()) # update error matrix
+            errors_for_plotting[i][m] = e[m].copy() # update error matrix
+            # print(f"Errors for plotting {errors_for_plotting}") # for debugging
 
         # Track the squared error (V4)
         if track_error:
@@ -189,25 +194,16 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
             squared_errors[i] = error
 
     if track_error and plot_errors and plot_active_halfspaces:
-        # Wrap everything up into a tuple
         error_tuple = (squared_errors, stalled_errors, converged_errors)
-        # Return additional vector
         return x, path, error_tuple, errors_for_plotting, active_half_spaces
     elif track_error and plot_active_halfspaces:
-        # Wrap everything up into a tuple
         error_tuple = (squared_errors, stalled_errors, converged_errors)
-        # Return additional vector
         return x, path, error_tuple, None, active_half_spaces
     elif track_error and plot_errors:
-        # Wrap everything up into a tuple
         error_tuple = (squared_errors, stalled_errors, converged_errors)
-        # Return additional vector
         return x, path, error_tuple, errors_for_plotting, None
     elif track_error:
-        # Wrap everything up into a tuple
         error_tuple = (squared_errors, stalled_errors, converged_errors)
-        # Return additional vector
         return x, path, error_tuple, None, None
     else:
-        # Return finite-time approximation x to projection task and error e
         return x, path, None, None, None
