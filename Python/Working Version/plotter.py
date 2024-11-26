@@ -200,27 +200,6 @@ def plot_path(path: np.ndarray, ax, errors_for_plotting: np.ndarray=None,
              label='Projection Path')
 
     # Plot the errors (quivers)
-    # # TODO Need to fix this implementation at some point
-    # if plot_errors:
-    #     n = errors_for_plotting.shape[1]  # number of halfspaces
-    #     max_iter = errors_for_plotting.shape[0]  # algorithm iterations
-    #     iteration = 1 # external for loop iterations
-    #     m = 0
-    #     for errors in errors_for_plotting:
-    #         print(f"Errors: {errors}")
-    #         for error in errors:
-    #             index = (m - n) % (iteration * n) + n
-    #             if index < max_iter * n:
-    #                 # debugging prints
-    #                 # print(f"max_iter: {max_iter}| n: {n} | m: {m} | index: {index} | iteration: {iteration}")
-    #                 # print(index, (x_coords[index], y_coords[index]), error)
-
-    #                 # Plot error vectors as quivers
-    #                 ax.quiver(x_coords[index], y_coords[index], error[0], error[1],
-    #                           angles='xy', scale_units='xy', scale=1, alpha=0.3)
-    #                 m += 1
-    #         iteration += 1
-
     if plot_errors and errors_for_plotting is not None:
         n = errors_for_plotting.shape[1]  # number of halfspaces
         max_iter = errors_for_plotting.shape[0]  # algorithm iterations
