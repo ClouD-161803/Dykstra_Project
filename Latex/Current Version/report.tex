@@ -52,19 +52,54 @@
 
 \pdfobjcompresslevel=0
 
-\title{Dykstra's Alternating Projection for Polyhedral Sets\thanks{This research was supported by the Keble College Small Research Grant (KSRG118).}}
+\title{Fast-Forwarding Stalling of Dykstra's Alternating Projection for Polyhedral Sets\thanks{This research was supported by the Keble College Small Research Grant (KSRG118).}}
 \author{Claudio Vestini and Idris Kempf}
 \date{Michaelmas Term 2024}
 \begin{document}
+
+\thispagestyle{empty}
+
+\noindent
+\textit{
+The Keble Small Research Grant (KSRG) KSRG118 was used to remunerate Claudio Vestini, a third-year engineering science undergraduate at Keble, for his work over seven weeks during the long vacation. The majority of the technical work was carried out by Claudio, and weekly meetings were held throughout the project. The KSRG successfully enabled me to launch a new research stream, and the research outputs will be incorporated into a future publication with Claudio as an author, in which KSRG support will be gratefully acknowledged. Additionally, the program code developed during this project will be made publicly available upon publication.
+}
+
+
+\section*{Summary}
+Euclidean projections are ubiquitous in engineering, optimisation, and machine learning, playing a central role in many algorithms for solving problems constrained by complex sets. Mathematically, the projection of a point $x^\circ$ onto a set $S$ is defined as the closest point $x^\star\in S$ to $x^\circ$, as illustrated in Figure~\ref{fig:proj} for two dimensions. Graphically, this definition can be extended to the projection of a set of points onto another set to obtain the shadow of an object in 3D. In constrained optimisation problems, this definition is extended to $N$ dimensions, modelling the projection of optimisation variables onto a constraint set. For example, the constraint set could represent delivery stops and available trucks in an optimisation problem that aims to minimise delivery times and fuel consumption. Such an optimisation problem is typically solved using a \textit{solver} -- an algorithm that iteratively approaches an optimum while projecting the variables onto a constraint set. However, the projection itself defines another optimisation problem that is difficult to solve in general. Most solvers therefore simplify the projection by reformulating the optimisation problem and adding auxiliary variables related to the constraints, usually at the expense of accuracy and computational efficiency.
+
+\begin{figure}[!h]
+\centering
+\begin{tikzpicture}[scale=0.8]
+    % Draw the potato-shaped set S
+    \draw[thick, fill=blue!20, opacity=0.5, rounded corners=1pt] 
+        plot[smooth cycle, tension=0.8] coordinates {(1,1) (2,0.8) (3,1.2) (3.5,2) (2.8,3) (1.5,2.5)};
+    \node[above right] at (1,1) {$S$};
+
+    % Define coordinates
+    \coordinate (x0) at (0,3.5); % x^\circ
+    \coordinate (x_star) at (1.375,2.375); % x^* (on the potato boundary)
+
+    % Draw the projection line
+    \draw[thick, dashed] (x0) -- (x_star);
+
+    % Draw points
+    \filldraw[black] (x0) circle (1.5pt) node[above right] {$x^\circ$};
+    \filldraw[black] (x_star) circle (1.5pt) node[below right] {$x^\star$};
+\end{tikzpicture}
+\caption{Illustration of the two-dimensional projection $x^\star$ of a point $x^\circ$ onto a set $S$.}\label{fig:proj}
+\end{figure}
+
+An alternative to solving the complicated projection problem could be to use a specialised algorithm, \textit{Dykstra's Alternating Projection}, an iterative procedure developed in the 1980s. However, although Dykstra's algorithm has proven to converge in theory, several practical issues remain. For example, it has been shown that the algorithm can \textit{stall} in certain situations for an indefinite number of iterations, yielding inaccurate solutions or decreasing computational efficiency. In this project, we successfully addressed and solved the stalling problem associated with projections onto polyhedral sets, i.e. an intersection of multi-variable (in)equalities each of which can be interpreted as an $N$-dimensional half-space. Polyhedral sets can be used to approximate most constraint sets in practice and therefore play a particularly important role in engineering and optimisation.
+
+To solve this problem, stalling situations referenced in the literature were replicated both graphically and mathematically. The mathematical properties of polyhedral sets were then used to simplify Dykstra's algorithm. Following an analysis of the simplified algorithm during stalling scenarios, a procedure for accurately predicting the \textit{length} of the stalling period was identified. This procedure was then embedded in the algorithm to ``fast-forward'' the stalling period. These results are summarised in the attached technical report, which will serve as a draft for a future publication. This publication will also address additional research questions, such as a detailed characterisation of the convergence properties of the modified algorithm. The fast-forwarding approach could also be applied to similar algorithms that have been shown to have stalling issues.
+
+\newpage
+
 \maketitle
-
-\section{Summary}
-
-
-
 \section{Introduction}
 
-Euclidean projections are ubiquitous in engineering, optimisation, and machine learning, playing a central role in many algorithms for solving problems constrained by complex sets. Mathematically, a projection of a point $x^\circ\in\R^n$ onto a closed convex set $\mathcal{H}\subset \R^p$ is defined as the point $x^\star\eqdef \mathcal{P}_{\mathcal{H}}(x)$ that minimises the Euclidean distance between $x^\circ$ and any point in $\mathcal{H}$:
+The projection of a point $x^\circ\in\R^n$ onto a closed convex set $\mathcal{H}\subset \R^p$ is defined as the point $x^\star\eqdef \mathcal{P}_{\mathcal{H}}(x)$ that minimises the Euclidean distance between $x^\circ$ and any point in $\mathcal{H}$:
 \begin{align}\label{eq:projection}
 \mathcal{P}_{\mathcal{H}}(x)\eqdef \argmin_{x\in\mathcal{H}}\twonorm{x-x^\circ}.
 \end{align}
