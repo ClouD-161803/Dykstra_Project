@@ -132,14 +132,14 @@ This is a variation of the simpler Von Neumann's \emph{Method of Alternating Pro
     
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-        \includegraphics[width=1\textwidth]{MAP_wiki.png}
+        \includegraphics[width=1\textwidth]{Latex/Current Version/Figures/MAP_wiki.png}
         \caption{MAP algorithm with successive projections y and x onto sets C and D respectively}
         \label{fig:wikiMAP}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-        \includegraphics[width=1\textwidth]{Dykstra_wiki.png}
+        \includegraphics[width=1\textwidth]{Latex/Current Version/Figures/Dykstra_wiki.png}
         \caption{Dykstra's algorithm with associated errors p and q}
         \label{fig:wikiDykstra}
     \end{subfigure}
@@ -156,14 +156,14 @@ Despite MAP being much simpler, it exhibits weak convergence~\cite{BREGMAN} and 
     
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-        \includegraphics[width=1\textwidth]{MAP_demonstration.png}
+        \includegraphics[width=1\textwidth]{Latex/Current Version/Figures/MAP_demonstration.png}
         \caption{Sub-optimal solution for MAP after 1 iteration. Nothing happens in second iteration}
         \label{fig:demonstrationMAP}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-        \includegraphics[width=1\textwidth]{Dykstra_demonstration.png}
+        \includegraphics[width=1\textwidth]{Latex/Current Version/Figures/Dykstra_demonstration.png}
         \caption{Dykstra gets closer to optimal solution in second iteration}
         \label{fig:demonstrationDykstra}
     \end{subfigure}
@@ -230,14 +230,14 @@ A specific example is given for the case that the set is provided by the interse
     
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-        \includegraphics[width=1\textwidth]{StallingRegionsHand.png}
+        \includegraphics[width=1\textwidth]{Latex/Current Version/Figures/StallingRegionsHand.png}
         \caption{Line-box example with different regions that yield different convergence properties.}
         \label{fig:region}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-        \includegraphics[width=1\textwidth]{DifferentSequences.png}
+        \includegraphics[width=1\textwidth]{Latex/Current Version/Figures/DifferentSequences.png}
         \caption{Stalling for the line-box example when $x_0$ is in the red region.}
         \label{fig:stalling}
     \end{subfigure}
@@ -258,14 +258,14 @@ If the boundary of the box was strictly ``smooth'', there would be no corner to 
     
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-        \includegraphics[width=1\textwidth]{non_rounded_test.png}
+        \includegraphics[width=1\textwidth]{Latex/Current Version/Figures/non_rounded_test.png}
         \caption{Dykstra's algorithm on the box and line example}
         \label{fig:nonRounded}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-        \includegraphics[width=1\textwidth]{rounded_test.png}
+        \includegraphics[width=1\textwidth]{Latex/Current Version/Figures/rounded_test.png}
         \caption{Rounded edges prevent algorithm from stalling}
         \label{fig:Rounded}
     \end{subfigure}
@@ -286,7 +286,7 @@ Let us consider the same line-box constraint set as~\ref{fig:region}, but now le
 \begin{figure}[h!]
     \centering
     
-    \includegraphics[width=0.6\textwidth]{one_corner_rounding.png}
+    \includegraphics[width=0.6\textwidth]{Latex/Current Version/Figures/one_corner_rounding.png}
     \caption{Dykstra's algorithm applied to initial point $z = (-10,~10)$}
     \label{fig:oneCorner}
 
@@ -298,7 +298,7 @@ Let us consider the same line-box constraint set as~\ref{fig:region}, but now le
 \begin{figure}[h!]
     \centering
     
-    \includegraphics[width=1\textwidth]{hundred_corners_rounding.png}
+    \includegraphics[width=1\textwidth]{Latex/Current Version/Figures/hundred_corners_rounding.png}
     \caption{Dykstra's algorithm applied to initial point $z = (-10, 10)$, box is now rounded by 100 corners}
     \label{fig:hundredCorners}
 
@@ -343,20 +343,20 @@ The introduction of $\beta_m$ adds another degree of freedom to Dykstra's algori
 \begin{figure}[h!]
     \centering
     
-    \includegraphics[width=1\textwidth]{MAP_one_corner.png}
+    \includegraphics[width=1\textwidth]{Latex/Current Version/Figures/MAP_one_corner.png}
     \caption{Dykstra's algorithm applied to initial point $z = (-10,~10)$, with $\beta_m = 0$. This is essentially applying MAP}
     \label{fig:MAPtenten}
 
 \end{figure}
 %
-\section{Choice of \beta_m} \label{sec: new algorithm}
+\section{Choice of $\beta_m$} \label{sec: new algorithm}
 %
 As discussed in Section~\ref{sec: dykstra}, MAP does not always produce the optimal solution as its output. In general, MAP will converge weakly to \textit{some} point on the feasible region (i.e. locus of points which constitute the intersection of all halfspaces)~\cite{BREGMAN}. More specifically, if $x_m \in \bigcap_{i=1}^n \mathcal{H}_i$, then $x_{m+1},~x_{m+2},~... = x_m$. This constitutes MAP's biggest flaw, as seen in Figure~\ref{fig:MAPterminates}.
 %
 \begin{figure}[h!]
     \centering
     
-    \includegraphics[width=0.95\textwidth]{in_intersection_MAP.png}
+    \includegraphics[width=0.95\textwidth]{Latex/Current Version/Figures/in_intersection_MAP.png}
     \caption{MAP applied to initial point $z = (0.5,~10)$. We land on a point on the intersection of all halfspaces on first iteration, hence algorithm does not proceed any further}
     \label{fig:MAPterminates}
 
@@ -377,7 +377,7 @@ However, when the initial point to be projected lies outside of $\bigcap_{i=1}^n
 \begin{figure}[h!]
     \centering
     
-    \includegraphics[width=0.6\textwidth]{not_in_intersection_modified.png}
+    \includegraphics[width=0.6\textwidth]{Latex/Current Version/Figures/not_in_intersection_modified.png}
     \caption{Modified method applied to initial point $z = (-10,~10)$.}
     \label{fig:oneCornerModified}
 
@@ -389,7 +389,7 @@ It is also worth remarking that this new modified algorithm will also work in th
 \begin{figure}[h!]
     \centering
     
-    \includegraphics[width=1\textwidth]{in_intersection_modified.png}
+    \includegraphics[width=1\textwidth]{Latex/Current Version/Figures/in_intersection_modified.png}
     \caption{Modified method applied to initial point $z = (0.5,~10)$. In this case, $\beta_m$ is set to $1$ for all $m > 1$.}
     \label{fig:noTermination}
 
@@ -403,7 +403,7 @@ It seems that the modified algorithm proposed in Section~\ref{sec: new algorithm
 \begin{figure}[h!]
     \centering
     
-    \includegraphics[width=1\textwidth]{intermediate_steps.png}
+    \includegraphics[width=1\textwidth]{Latex/Current Version/Figures/intermediate_steps.png}
     \caption{In an example such as this one, to show no stalling, one would have to prove that, if we land on one of the blue dots within the feasible region (line segment between $(0,~1)$ and $(1,~0.5)$), then it is not possible to stall.}
     \label{fig:intermediates}
 
@@ -421,5 +421,5 @@ It seems that the modified algorithm proposed in Section~\ref{sec: new algorithm
 \newpage
 \bibliographystyle{plain}
 \bibliography{master_bib_abbrev}
-%
+
 \end{document}
