@@ -19,6 +19,7 @@ from visualiser import Visualiser
 def run_with_tracking() -> None:
     """Tests Dykstra's algorithm on the intersection of a box at the origin
     and a line passing through (2, 0) and (0, 1)"""
+    # --- Define Problem ---
 
     # # * Without rounding
     # Define the box constraints (half-spaces) (make sure these are floats)
@@ -91,7 +92,7 @@ def run_with_tracking() -> None:
     # y_range = [-6, 1.]
     # delete_half_spaces = True
 
-    # ===== ALGORITHM CONFIGURATION =====
+    # --- Configuration ---
     
     max_iter: int = 50
     plot_activity: bool = True
@@ -106,7 +107,7 @@ def run_with_tracking() -> None:
     # A: np.ndarray = np.vstack([N_line, N_box])
     # c: np.ndarray = np.hstack([c_line, c_box])
 
-    # ===== SOLVER SELECTION =====
+    # --- Solver Selection ---
     
     # # Standard Dykstra's Algorithm
     # solver = DykstraProjectionSolver(
@@ -135,7 +136,7 @@ def run_with_tracking() -> None:
         delete_spaces=delete_half_spaces
     )
     
-    # ===== SOLVE AND VISUALISE =====
+    # --- Run Solver ---
     
     result = solver.solve()
     
