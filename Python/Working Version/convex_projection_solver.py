@@ -501,8 +501,8 @@ class DykstraStallDetectionSolver(ConvexProjectionSolver):
         """
         if self.stalling and self.m_stalling is not None:
             n_fast_forward = int(min(
-                [np.ceil(- np.dot(self.e[m], normal) / (np.dot(self.x_historical[i-1][m-1], normal) - offset))
-                 if np.dot(self.x_historical[i-1][m-1], normal) < offset else 1e6
+                [np.ceil(- np.dot(self.e[m], normal) / (np.dot(self.x_historical[i][m-1], normal) - offset))
+                 if np.dot(self.x_historical[i][m-1], normal) < offset else 1e6
                  for m, (normal, offset) in enumerate(zip(self.N, self.c))]
             ))
             n_fast_forward -= 1
@@ -511,7 +511,7 @@ class DykstraStallDetectionSolver(ConvexProjectionSolver):
 
             # Update all errors for the following round
             for m, (normal, offset) in enumerate(zip(self.N, self.c)):
-                self.e[m] = self.e[m] + n_fast_forward * (self.x_historical[i-1][m-1] - self.x_historical[i-1][m])
+                self.e[m] = self.e[m] + n_fast_forward * (self.x_historical[i][m-1] - self.x_historical[i][m])
                 if not self._is_in_half_space(self.x + self.e[(m - self.n) % self.n], normal, offset):
                     self.active_half_spaces[m][i] = 1
 
@@ -553,7 +553,7 @@ class DykstraStallDetectionSolver(ConvexProjectionSolver):
                 # Check for stalling
                 if i > 0:
                     if ((not self.stalling) and (self.active_half_spaces[m][i] == 1) and
-                            np.array_equal(self.x_historical[i][m], self.x_historical[i - 1][m])):
+                            np.array_equal(self.x_historical[i + 1][m], self.x_historical[i][m])):
                         self.stalling = True
                         self.m_stalling = m
                         print(f"Stalling detected at iteration {i} and half-space {self.m_stalling}")
