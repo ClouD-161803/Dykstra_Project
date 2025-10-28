@@ -171,8 +171,8 @@ def plot_half_spaces(Nc_pairs: list, num_of_iterations: int, ax,
               f"Check the format of Nc_pairs or the dimensions of N.")
 
 
-def plot_path(path: np.ndarray, ax, errors_for_plotting: np.ndarray=None,
-              plot_errors: bool=False) -> None:
+def plot_path(path: list, ax, errors_for_plotting: np.ndarray=None,
+              plot_errors: bool=False, active_half_spaces=None) -> None:
     """
     Plots the path followed by Dykstra's algorithm during projection.
 
@@ -191,13 +191,24 @@ def plot_path(path: np.ndarray, ax, errors_for_plotting: np.ndarray=None,
     flattened_path = path.reshape(-1, 2)
     # print(f"Flattened path: {flattened_path}")
     # Extract x and y coordinates from the path
-    x_coords = [point[0] for point in flattened_path]
-    y_coords = [point[1] for point in flattened_path]
+    n_spaces = len(active_half_spaces)
+    x_coords = [path[0][0]]
+    y_coords = [path[0][1]]
+    x_coords.extend([point[0] for i, point in enumerate(path[1:-1]) if active_half_spaces[i % n_spaces][i // n_spaces] == 1])
+    y_coords.extend([point[1] for i, point in enumerate(path[1:-1]) if active_half_spaces[i % n_spaces][i // n_spaces] == 1])
+    # x_coords = [point[0] for i, point in enumerate(path[:-1])]
+    # y_coords = [point[1] for i, point in enumerate(path[:-1])]
 
     # Plot the path
     ax.plot(x_coords, y_coords, marker='.', linestyle='--',
              color='blue', linewidth=0.5, markersize=1,
              label='Projection Path')
+    n = len(errors_for_plotting[0]) # number of halfspaces
+    # n_coords = len(x_coords)
+    # print(active_half_spaces)
+    # for i in range(n_coords):
+    #     if i>0 and (i % n-1 == 0):
+    #         ax.plot(x_coords[i], y_coords[i], color='red', markersize='2', marker='x')
 
     # Plot the errors (quivers)
     if plot_errors and errors_for_plotting is not None:

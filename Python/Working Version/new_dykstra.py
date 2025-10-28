@@ -97,6 +97,8 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
     # print(f"x_historical: {x_historical}") # for debugging
     # print((np.array(x_historical).shape)) # for debugging
     # print((np.array(errors_for_plotting).shape)) # for debugging
+#     x_historical = [[np.zeros_like(z) for _ in range(n)] for _ in range(max_iter)]
+#     prev_x_no_ffw = None # not sure what this is
 
     # Optimal solution (V4)
     actual_projection = find_optimal_solution(z, N, c, dimensions)
@@ -107,6 +109,9 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
     converged_errors = np.zeros(max_iter)
 
     # Main body of Dykstra's algorithm
+    stalling: bool = False
+    k_stalling: int = 1  # number of rounds to fast forward when stalling occurs
+    m_stalling: int | None = None  # index of half-space from which k_stalling is computed
     for i in range(max_iter):
         # Iterate over every half plane
         for m, (normal, offset) in enumerate(zip(N, c)):
@@ -114,6 +119,28 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
             # we get an index between 0 and n (non-negative)
             index = (m - n) % n  # this is essentially just m-n with zeros for m<n
             x_temp = x.copy() # temporary variable (x_m)
+
+            # Find number of rounds to fast forward after 1 round of stalling
+            if stalling and m_stalling == m:
+                n_fast_forward = int(min(
+                    [np.ceil(- np.dot(e[m], normal) / (np.dot(x_historical[i-1][m-1], normal) - offset))
+                     if np.dot(x_historical[i-1][m-1], normal) < offset else 1e6
+                     for m, (normal, offset) in enumerate(zip(N, c))]
+                ))
+                n_fast_forward -= 1
+                # NOTE: There still seems to be a bug here. Swap the order of line and box, and then it becomes visible
+                # that in one situation I have to substract 1 from n_fast_forward, and in the other it is fine as it is.
+                # This is most probably related to some bug in how em is updated during the stalling period. To
+                # simplify all of this, the stalling check could occur in the range(max_iter) loop, checking if all
+                # half-spaces are stalling. Then, the fast forwarding could be applied here.
+                print(f"Fast forwarding {n_fast_forward} rounds to exit stalling at iteration {i}. ")
+                # Update all errors for the following round
+                for m, (normal, offset) in enumerate(zip(N, c)):
+                    e[m] = e[m] + n_fast_forward * (x_historical[i-1][m-1] - x_historical[i-1][m])
+                    if not is_in_half_space(x + e[index], normal, offset):
+                        active_half_spaces[m][i] = 1
+                stalling = False
+                m_stalling = None
 
             # Check if current point is in the halfspace (V9)
             if plot_active_halfspaces:
@@ -131,36 +158,13 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
             x_historical[i][m] = x.copy()
 
             # Check for stalling (V9)
-            if i == 0 or m == 0:
-                pass
-            else:
-                # Debugging
-                # diff1 = x_current[i][m] - x_current[i][m - 1]
-                # diff2 = x_current[i - 1][m] - x_current[i - 1][m - 1]
-                # print(diff1, diff2)
-
+            if i > 0:
                 # Check for stalling if x_m = x_m-n
-                if np.array_equal(x_historical[i][m], x_historical[i - 1][m]):
+                if ((not stalling) and (active_half_spaces[m][i] == 1) and
+                        np.array_equal(x_historical[i][m], x_historical[i - 1][m])):
                     stalling = True
-                else:
-                    stalling = False
-                # print(stalling) # for debugging
-
-            # Exit stalling (V9)
-            if stalling:
-                # Constant growth error
-                diff = x_historical[i][m] - x_historical[i][m - 1]
-                # Need to continue if this half-space cannot become inactive
-                tmp = diff / normal
-                diff_sign = tmp[np.isfinite(tmp)][0]
-                if diff_sign > 0:
-                    continue
-                k = 0
-                # Iterate until boundary is crossed
-                while not is_in_half_space(x_temp + k*diff, normal, offset):
-                    k += 1
-                # Update x
-                x = x_temp + k * diff
+                    m_stalling = m
+                    print(f"Stalling detected at iteration {i} and half-space {m_stalling}")
 
             # # Path
             # path.append(x.copy())  # Add the updated x to the path

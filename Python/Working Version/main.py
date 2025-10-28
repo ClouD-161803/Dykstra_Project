@@ -7,7 +7,9 @@ from gradient import quadprog_solve_qp
 from edge_rounder import rounded_box_constraints
 
 
-def test_with_tracking() -> None:
+
+
+def run_with_tracking() -> None:
     """Tests Dykstra's algorithm on the intersection of a box at the origin
     and a line passing through (2, 0) and (0, 1)"""
 
@@ -43,7 +45,7 @@ def test_with_tracking() -> None:
     # Point to project and x-y range (uncomment wanted example)
 
     # Simple top left - stalling - y y y
-    z = np.array([-2., 1.4])
+    z = np.array([-4., 1.4])
     x_range = [-2.5, 0.5]
     y_range = [0.5, 2.25]
     delete_half_spaces = True
@@ -86,12 +88,15 @@ def test_with_tracking() -> None:
 
 
     # Project using Dykstra's algorithm
-    max_iter: int = 2 # number of iterations
+    max_iter: int = 50 # number of iterations
     plot_quivers: bool = True # for plotting error quivers
     plot_activity: bool = True # for plotting halfspace activity
+    A: np.ndarray = np.vstack([N_box, N_line])
+    c: np.ndarray = np.hstack([c_box, c_line])
+    A: np.ndarray = np.vstack([N_line, N_box])
+    c: np.ndarray = np.hstack([c_line, c_box])
     projection, path, error_tuple, errs_to_plot, active_half_spaces = (
-        dykstra_projection(z, np.vstack([N_box, N_line]),
-                           np.hstack([c_box, c_line]),
+        dykstra_projection(z, A, c,
                            max_iter, track_error=True, plot_errors=plot_quivers,
                            plot_active_halfspaces=plot_activity,
                            delete_spaces=delete_half_spaces)
@@ -130,7 +135,7 @@ def test_with_tracking() -> None:
 
     # Visualize the results
     Nc_pairs = [
-        (f"'Box'\n(rounded by {corner_count} corner(s))", "Greys", N_box, c_box),
+        (f"'Box'\n(rounded by {corner_count} corner(s))" if corner_count > 1 else "Box", "Greys", N_box, c_box),
         ("Line", "Greys", N_line, c_line)
     ]
 
@@ -139,7 +144,7 @@ def test_with_tracking() -> None:
     # Plot the half spaces
     plot_half_spaces(Nc_pairs, max_iter, ax1, x_range, y_range)
     # Plot the path (V8)
-    plot_path(path, ax1, errs_to_plot, plot_errors=plot_quivers)
+    plot_path(path, ax1, errs_to_plot, plot_errors=plot_quivers, active_half_spaces=active_half_spaces)
 
     # Plot the original point and its projection
     ax1.scatter(z[0], z[1], color='green', marker='o', label='Original Point')
@@ -191,4 +196,4 @@ def test_with_tracking() -> None:
     # print(len(errs_to_plot[0]))
 
 if __name__ == "__main__":
-    test_with_tracking()
+    run_with_tracking()
