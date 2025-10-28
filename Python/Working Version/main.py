@@ -109,13 +109,13 @@ def run_with_tracking() -> None:
     # ===== SOLVER SELECTION =====
     
     # Standard Dykstra's Algorithm
-    solver = DykstraProjectionSolver(
-        z, A, c, max_iter,
-        track_error=True,
-        plot_errors=plot_quivers,
-        plot_active_halfspaces=plot_activity,
-        delete_spaces=delete_half_spaces
-    )
+    # solver = DykstraProjectionSolver(
+    #     z, A, c, max_iter,
+    #     track_error=True,
+    #     plot_errors=plot_quivers,
+    #     plot_active_halfspaces=plot_activity,
+    #     delete_spaces=delete_half_spaces
+    # )
     
     # # Hybrid MAP-Dykstra Algorithm
     # solver = DykstraMapHybridSolver(
@@ -127,13 +127,13 @@ def run_with_tracking() -> None:
     # )
     
     # Dykstra with Stalling Detection
-    # solver = DykstraStallDetectionSolver(
-    #     z, A, c, max_iter,
-    #     track_error=True,
-    #     plot_errors=plot_quivers,
-    #     plot_active_halfspaces=plot_activity,
-    #     delete_spaces=delete_half_spaces
-    # )
+    solver = DykstraStallDetectionSolver(
+        z, A, c, max_iter,
+        track_error=True,
+        plot_errors=plot_quivers,
+        plot_active_halfspaces=plot_activity,
+        delete_spaces=delete_half_spaces
+    )
     
     # ===== SOLVE AND VISUALISE =====
     

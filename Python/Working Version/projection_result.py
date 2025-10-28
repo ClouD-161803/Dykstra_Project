@@ -1,38 +1,33 @@
 """
-This module defines a data class for storing projection solver results.
-
-Classes:
-- ProjectionResult:
-    Container for projection solver outputs.
+This module defines the ProjectionResult dataclass for storing solver outputs.
 """
 
-import numpy as np
 from dataclasses import dataclass
-from typing import Optional
+import numpy as np
 
 
 @dataclass
 class ProjectionResult:
     """
-    Data class for storing results from a projection solver.
+    Data class for storing projection solver results.
     
     Attributes:
         projection: Final projected point.
-        path: List of intermediate points visited during projection.
-        squared_errors: Array of squared errors at each iteration.
-        stalled_errors: Array of stalled error flags at each iteration.
-        converged_errors: Array of converged error flags at each iteration.
-        errors_for_plotting: List of error vectors for visualization.
-        active_half_spaces: Matrix of active half-space flags.
+        path: Historical path of projections (x_historical array).
+        squared_errors: Squared errors at each iteration (if track_error=True).
+        stalled_errors: Stalled errors at each iteration (if track_error=True).
+        converged_errors: Converged errors at each iteration (if track_error=True).
+        errors_for_plotting: Error vectors for quiver plotting (if plot_errors=True).
+        active_half_spaces: Active half-spaces tracking (if plot_active_halfspaces=True).
     """
     projection: np.ndarray
-    path: list
-    squared_errors: Optional[np.ndarray] = None
-    stalled_errors: Optional[np.ndarray] = None
-    converged_errors: Optional[np.ndarray] = None
-    errors_for_plotting: Optional[list] = None
-    active_half_spaces: Optional[np.ndarray] = None
-    
+    path: np.ndarray | None = None
+    squared_errors: np.ndarray | None = None
+    stalled_errors: np.ndarray | None = None
+    converged_errors: np.ndarray | None = None
+    errors_for_plotting: np.ndarray | None = None
+    active_half_spaces: np.ndarray | None = None
+
     def has_error_tracking(self) -> bool:
         """Check if error tracking data is available."""
         return self.squared_errors is not None

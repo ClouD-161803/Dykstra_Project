@@ -2,7 +2,7 @@
 This module provides a unified visualisation class for projection results.
 
 Classes:
-- ProjectionVisualiser:
+- Visualiser:
     Handles all visualisation of projection solver results including half-spaces,
     paths, errors, and active half-space tracking.
 """
@@ -18,7 +18,7 @@ from projection_result import ProjectionResult
 
 class Visualiser:
     """
-    Visualisation class for projection solver results.
+    Unified visualisation class for projection solver results.
     
     Attributes:
         result: ProjectionResult object containing solver outputs.
@@ -29,9 +29,9 @@ class Visualiser:
     """
     
     def __init__(self, result: ProjectionResult, nc_pairs: list, 
-                 max_iter: int, x_range: list, y_range: list):
+                 max_iter: int, x_range: list[float], y_range: list[float]) -> None:
         """
-        Initialize the visualizer.
+        Initialise the visualiser.
         
         Args:
             result: ProjectionResult object from solver.
@@ -48,7 +48,6 @@ class Visualiser:
         self.fig: Figure | None = None
         self.ax_main: Axes | None = None
         self.ax_error: Axes | None = None
-        self.ax_activity: Axes | None = None
 
     def plot_2d_space(self, N: np.ndarray, c: np.ndarray, X: np.ndarray, Y: np.ndarray,
                       label: str, cmap: str, ax: Axes) -> None:
@@ -61,7 +60,7 @@ class Visualiser:
             X: 2D array of x coordinates.
             Y: 2D array of y coordinates.
             label: Label for the plot.
-            cmap: Colormap name.
+            cmap: Colourmap name.
             ax: Axes handle for plotting.
         """
         Z = np.ones_like(X)
@@ -85,7 +84,7 @@ class Visualiser:
             N: Matrix of normal vectors.
             c: Vector of constant offsets.
             label: Label for the plot.
-            cmap: Colormap name.
+            cmap: Colourmap name.
             ax: Axes handle for plotting.
         """
         colourmap = cm.get_cmap(cmap)
@@ -140,27 +139,48 @@ class Visualiser:
 
     def plot_path(self, ax: Axes) -> None:
         """
-        Plot the path followed by the algorithm.
+        Plot the path followed by the algorithm with optional quiver plotting.
 
         Args:
             ax: Axes handle for plotting.
         """
         path = self.result.path
-        active_half_spaces = self.result.active_half_spaces
+        errors_for_plotting = self.result.errors_for_plotting
         
-        n_spaces = len(active_half_spaces) if active_half_spaces is not None else 0
-        x_coords = [path[0][0]]
-        y_coords = [path[0][1]]
+        if path is None:
+            print("Path data not available.")
+            return
         
-        if active_half_spaces is not None:
-            x_coords.extend([point[0] for i, point in enumerate(path[1:-1]) 
-                           if active_half_spaces[i % n_spaces][i // n_spaces] == 1])
-            y_coords.extend([point[1] for i, point in enumerate(path[1:-1]) 
-                           if active_half_spaces[i % n_spaces][i // n_spaces] == 1])
+        # Ensure path is proper shape
+        if path.ndim != 3:
+            print("Path has unexpected shape.")
+            return
+        
+        # Flatten path for plotting - this includes all points from all iterations and half-spaces
+        flattened_path = path.reshape(-1, path.shape[-1])
+        
+        # Extract x and y coordinates from the path
+        x_coords = [point[0] for point in flattened_path]
+        y_coords = [point[1] for point in flattened_path]
 
+        # Plot the path
         ax.plot(x_coords, y_coords, marker='.', linestyle='--',
                 color='blue', linewidth=0.5, markersize=1,
                 label='Projection Path')
+
+        # Plot the errors (quivers) - only where errors were tracked
+        if errors_for_plotting is not None and errors_for_plotting.ndim == 3:
+            max_iter, n_spaces = errors_for_plotting.shape[0], errors_for_plotting.shape[1]
+            for i in range(max_iter):
+                for m in range(n_spaces):
+                    error = errors_for_plotting[i, m]
+                    # Only plot quiver if error vector is non-zero
+                    if not np.allclose(error, 0):
+                        # The point for the quiver is the start of the projection step
+                        point = path[i, m]
+                        ax.quiver(point[0], point[1], error[0], error[1],
+                                 angles='xy', scale_units='xy', scale=1, alpha=0.3)
+
         ax.legend()
 
     def plot_errors(self, ax: Axes) -> None:
@@ -170,34 +190,27 @@ class Visualiser:
         Args:
             ax: Axes handle for plotting.
         """
-        if not self.result.has_error_tracking():
+        if (self.result.squared_errors is None or 
+            self.result.stalled_errors is None or 
+            self.result.converged_errors is None):
             print("Error tracking data not available.")
             return
 
-        squared_errors = self.result.squared_errors
+        squared_errors = self.result.squared_errors.copy()
         stalled_errors = self.result.stalled_errors
         converged_errors = self.result.converged_errors
         
-        if squared_errors is None or stalled_errors is None or converged_errors is None:
-            print("Error data is incomplete.")
-            return
-        
         iterations = np.arange(0, self.max_iter, 1)
         
-        # Get last error before modification
-        last_error = squared_errors[-1]
-        squared_errors_copy = squared_errors.copy()
-        squared_errors_copy[-1] = None
-        
-        ax.plot(iterations, squared_errors_copy, color='red',
+        ax.plot(iterations, squared_errors, color='red',
                 label='Errors', linestyle='-', marker='o')
         ax.plot(iterations, stalled_errors, color='#D5B60A',
                 label='Stalling', linestyle='-', marker='o')
         ax.plot(iterations, converged_errors, color='green',
                 label='Converged\n(error under 1e-3)', linestyle='-', marker='o')
-        ax.scatter(iterations[-1], last_error,
+        ax.scatter(iterations[-1], squared_errors[-1],
                    color='#8B0000', marker='o',
-                   label=f'Final error is {format(last_error, ".2e")}')
+                   label=f'Final error is {format(squared_errors[-1], ".2e")}')
 
         ax.set_xlabel('Number of Iterations')
         ax.set_ylabel('Squared Errors')
@@ -213,25 +226,20 @@ class Visualiser:
             fig: Figure handle.
             gs: GridSpec handle.
         """
-        if not self.result.has_active_halfspace_data():
+        if self.result.active_half_spaces is None:
             print("Active half-space data not available.")
             return
 
         active_spaces = self.result.active_half_spaces
-        if active_spaces is None:
-            print("Active half-space data is None.")
-            return
-        
-        num_of_spaces = len(active_spaces)
+        num_of_spaces = active_spaces.shape[0]
         iterations = np.arange(0, self.max_iter, 1)
-        ax_vector = np.zeros(num_of_spaces, dtype=object)
 
         for i in range(num_of_spaces):
-            ax_vector[i] = fig.add_subplot(gs[i, 1])
-
-        for i, (active_space, ax) in enumerate(zip(active_spaces, ax_vector)):
+            ax = fig.add_subplot(gs[i, 1])
             if ax is None:
                 continue
+            
+            active_space = active_spaces[i]
             ax.plot(iterations, active_space, color='black',
                    label=f'Halfspace {i}', linestyle='-', marker='o')
             ax.set_ylim(0, 1)
@@ -245,7 +253,7 @@ class Visualiser:
     def visualise(self, plot_original_point: np.ndarray | None = None,
                   plot_optimal_point: np.ndarray | None = None) -> None:
         """
-        Create a comprehensive visualization of the projection results.
+        Create a comprehensive visualisation of the projection results.
 
         Args:
             plot_original_point: Original point z (optional).
@@ -282,11 +290,11 @@ class Visualiser:
         self.ax_main.legend()
 
         # Plot errors if available
-        if self.result.has_error_tracking():
+        if self.result.squared_errors is not None:
             self.plot_errors(self.ax_error)
 
         # Plot active halfspaces if available
-        if self.result.has_active_halfspace_data():
+        if self.result.active_half_spaces is not None:
             self.plot_active_halfspaces(self.fig, gs)
 
         # Adjust layout

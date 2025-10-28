@@ -215,12 +215,16 @@ class ConvexProjectionSolver(ABC):
         self.n = self.N.shape[0]
         self.x = self.z.copy()
         self.errors = np.zeros_like(self.z)
-        self.e = [self.errors] * self.n
-        self.errors_for_plotting = [self.e.copy()]
-        self.path = [self.z.copy()]
-        self.active_half_spaces = np.array([[np.zeros_like(self.n) for _ in range(max_iter)]
-                                             for _ in range(self.n)])
+        self.e = [self.errors.copy() for _ in range(self.n)]
+        # Initialise errors_for_plotting as 3D NumPy array
+        self.errors_for_plotting: np.ndarray = np.zeros((max_iter, self.n, len(self.z)))
+        # Track historical projections for path and quiver plotting, size max_iter + 1 for initial point
+        self.x_historical: np.ndarray = np.zeros((self.max_iter + 1, self.n, len(self.z)))
+        # Initialise first point as the initial point z
+        self.x_historical[0, :, :] = self.z.copy()
         self.actual_projection = self._find_optimal_solution(self.z, self.N, self.c, dimensions)
+        # Active halfspaces tracking
+        self.active_half_spaces: np.ndarray = np.zeros((self.n, max_iter))
         self.squared_errors = np.zeros(max_iter)
         self.stalled_errors = np.zeros(max_iter)
         self.converged_errors = np.zeros(max_iter)
@@ -346,12 +350,12 @@ class DykstraProjectionSolver(ConvexProjectionSolver):
                 # Update e_m
                 self._update_error(m, x_temp, self.x, index)
 
-                # Path
-                self.path.append(self.x.copy())
+                # Store historical data for path and quiver plotting, offset by 1
+                self.x_historical[i + 1][m] = self.x.copy()
 
                 # Errors
                 if self.plot_errors:
-                    self.errors_for_plotting.append(self.e.copy())
+                    self.errors_for_plotting[i][m] = self.e[m].copy()
 
             # Track the squared error
             self._track_error(i)
@@ -362,7 +366,7 @@ class DykstraProjectionSolver(ConvexProjectionSolver):
         """Format and return output as ProjectionResult object."""
         return ProjectionResult(
             projection=self.x,
-            path=self.path,
+            path=self.x_historical,
             squared_errors=self.squared_errors if self.track_error else None,
             stalled_errors=self.stalled_errors if self.track_error else None,
             converged_errors=self.converged_errors if self.track_error else None,
@@ -436,12 +440,12 @@ class DykstraMapHybridSolver(ConvexProjectionSolver):
                 # Update e_m with Dykstra's method
                 self._update_error(m, x_temp, self.x, index)
 
-                # Path
-                self.path.append(self.x.copy())
+                # Store historical data for path and quiver plotting, offset by 1
+                self.x_historical[i + 1][m] = self.x.copy()
 
                 # Errors
                 if self.plot_errors:
-                    self.errors_for_plotting.append(self.e.copy())
+                    self.errors_for_plotting[i][m] = self.e[m].copy()
 
             # Track the squared error
             self._track_error(i)
@@ -452,7 +456,7 @@ class DykstraMapHybridSolver(ConvexProjectionSolver):
         """Format and return output as ProjectionResult object."""
         return ProjectionResult(
             projection=self.x,
-            path=self.path,
+            path=self.x_historical,
             squared_errors=self.squared_errors if self.track_error else None,
             stalled_errors=self.stalled_errors if self.track_error else None,
             converged_errors=self.converged_errors if self.track_error else None,
@@ -474,8 +478,6 @@ class DykstraStallDetectionSolver(ConvexProjectionSolver):
         self.stalling = False
         self.k_stalling = 1
         self.m_stalling = None
-        self.x_historical = np.array([[np.zeros_like(self.z) for _ in range(self.n)]
-                                      for _ in range(self.max_iter)])
         self.prev_x_no_ffw = None
 
     def _update_error(self, m: int, x_temp: np.ndarray, x: np.ndarray, index: int) -> None:
@@ -545,8 +547,8 @@ class DykstraStallDetectionSolver(ConvexProjectionSolver):
                 # Update e_m
                 self._update_error(m, x_temp, self.x, index)
 
-                # Store historical data
-                self.x_historical[i][m] = self.x.copy()
+                # Store historical data for path and quiver plotting, offset by 1
+                self.x_historical[i + 1][m] = self.x.copy()
 
                 # Check for stalling
                 if i > 0:
@@ -556,12 +558,9 @@ class DykstraStallDetectionSolver(ConvexProjectionSolver):
                         self.m_stalling = m
                         print(f"Stalling detected at iteration {i} and half-space {self.m_stalling}")
 
-                # Path
-                self.path.append(self.x.copy())
-
                 # Errors
                 if self.plot_errors:
-                    self.errors_for_plotting.append(self.e.copy())
+                    self.errors_for_plotting[i][m] = self.e[m].copy()
 
             # Track the squared error
             self._track_error(i)
@@ -572,7 +571,7 @@ class DykstraStallDetectionSolver(ConvexProjectionSolver):
         """Format and return output as ProjectionResult object."""
         return ProjectionResult(
             projection=self.x,
-            path=self.path,
+            path=self.x_historical,
             squared_errors=self.squared_errors if self.track_error else None,
             stalled_errors=self.stalled_errors if self.track_error else None,
             converged_errors=self.converged_errors if self.track_error else None,
