@@ -23,18 +23,158 @@ Additional Features:
 
 import numpy as np
 from abc import ABC, abstractmethod
-from dykstra_functions import (is_in_half_space,
-                               project_onto_half_space,
-                               delete_inactive_half_spaces,
-                               find_optimal_solution,
-                               beta_check)
 from projection_result import ProjectionResult
+from gradient import quadprog_solve_qp
+
 
 class ConvexProjectionSolver(ABC):
     """
     Abstract base class for projecting a point onto the intersection of 
     convex sets (half-spaces).
     """
+
+    @staticmethod
+    def _normalise(normal: np.ndarray, offset: np.ndarray) -> tuple:
+        """
+        Normalises half space normal and constant offset.
+
+        Args:
+            normal: Normal vector of the half space.
+            offset: Constant offset of the half space.
+
+        Returns:
+            tuple: Unit normal vector and normalised offset.
+        """
+        norm = np.linalg.norm(normal)
+        if norm == 0:
+            raise ValueError("Warning: Zero-norm normal vector encountered.")
+        
+        unit_normal = normal / norm
+        constant_offset = offset / norm
+        return unit_normal, constant_offset
+
+    @staticmethod
+    def _is_in_half_space(point: np.ndarray, unit_normal: np.ndarray,
+                          constant_offset: np.ndarray) -> bool:
+        """
+        Checks if a point lies within a single half space.
+
+        Args:
+            point: Point to check.
+            unit_normal: *Unit* normal vector of the half space.
+            constant_offset: *Normalised* offset of the half space.
+
+        Returns:
+            bool: True if point is within the half space, else False.
+        """
+        dp = np.dot(point, unit_normal)
+        return dp <= constant_offset
+
+    @staticmethod
+    def _project_onto_half_space(point: np.ndarray, normal: np.ndarray,
+                                 offset: np.ndarray) -> np.ndarray:
+        """
+        Projects a point onto a single half space 'H_i'.
+        A half space is defined by H_i := {x | <x,n_i> <= c_i}, with boundary
+        B_i := {x | <x,n_i> = c_i}, and the projection of a point z onto H_i is
+        given by: P_H_i(z) = z - (<z,n_i> - c_i)*n_i if z is outside H_i.
+
+        Args:
+            point: Point to project.
+            normal: Normal vector of the half space.
+            offset: Constant offset of the half space.
+
+        Returns:
+            np.ndarray: Projected point.
+        """
+        unit_normal, constant_offset = ConvexProjectionSolver._normalise(normal, offset)
+
+        if ConvexProjectionSolver._is_in_half_space(point, unit_normal, constant_offset):
+            return point
+        else:
+            boundary_projection = (point - (np.dot(point, unit_normal)
+                                            - constant_offset) * unit_normal)
+            return boundary_projection
+
+    @staticmethod
+    def _delete_inactive_half_spaces(z: np.ndarray, N: np.ndarray, c: np.ndarray) -> tuple:
+        """
+        Deletes inactive half spaces.
+
+        Args:
+            z: Point used to check for inactive half spaces.
+            N: Matrix of normal vectors.
+            c: Vector of constant offsets.
+
+        Returns:
+            tuple: Updated matrix of normal vectors and vector of constant offsets.
+        """
+        indices_to_remove = np.zeros_like(c, dtype=bool)
+
+        for m, (normal, offset) in enumerate(zip(N, c)):
+            unit_normal, constant_offset = ConvexProjectionSolver._normalise(normal, offset)
+            if ConvexProjectionSolver._is_in_half_space(z, unit_normal, constant_offset):
+                indices_to_remove[m] = True
+
+        new_N = N[~indices_to_remove]
+        new_c = c[~indices_to_remove]
+        return new_N, new_c
+
+    @staticmethod
+    def _find_optimal_solution(point: np.ndarray, N: np.ndarray, c: np.ndarray,
+                               dimensions: int) -> np.ndarray:
+        """
+        Solves a quadratic programming problem to find the optimal solution that
+        minimizes the Euclidean distance between a given point and a target,
+        subject to linear constraints.
+
+        The function solves: min_x ∥x − point∥^2 subject to Gx <= h.
+
+        Args:
+            point: Target point in space for optimization.
+            N: Constraint matrix G in the quadratic programming formulation.
+            c: Constraint vector h in the quadratic programming formulation.
+            dimensions: Dimensionality of the space.
+
+        Returns:
+            np.ndarray: Optimal projection of the point.
+        """
+        A = np.eye(dimensions)
+        b = point.copy()
+        P = 2 * np.matmul(A.T, A)
+        q = -2 * np.matmul(A.T, b)
+        G = N
+        h = c
+
+        actual_projection = quadprog_solve_qp(P, q, G, h)
+        return actual_projection
+
+    @staticmethod
+    def _beta_check(point: np.ndarray, N: np.ndarray, c: np.ndarray) -> int:
+        """
+        Selects a value of beta based on whether the passed point lies
+        within the intersection of half-spaces.
+
+        Args:
+            point: Point to check.
+            N: Matrix of normal vectors.
+            c: Vector of constant offsets.
+
+        Returns:
+            int: 1 if the point is within the intersection, else 0.
+        """
+        beta = 1
+        not_in_intersection = False
+        rounded_point = np.around(point, decimals=10)
+        
+        for _, (normal, offset) in enumerate(zip(N, c)):
+            unit_normal, constant_offset = ConvexProjectionSolver._normalise(normal, offset)
+            if not ConvexProjectionSolver._is_in_half_space(rounded_point, unit_normal, constant_offset):
+                not_in_intersection = True
+        
+        if not_in_intersection:
+            beta = 0
+        return beta
 
     def __init__(self, z: np.ndarray, N: np.ndarray, c: np.ndarray,
                  max_iter: int, track_error: bool = False,
@@ -58,8 +198,12 @@ class ConvexProjectionSolver(ABC):
             delete_spaces: Whether to delete inactive half-spaces at start.
         """
         self.z = z.copy()
-        self.N = N.copy() if not delete_spaces else delete_inactive_half_spaces(z, N, c)[0]
-        self.c = c.copy() if not delete_spaces else delete_inactive_half_spaces(z, N, c)[1]
+        if delete_spaces:
+            self.N, self.c = self._delete_inactive_half_spaces(z, N, c)
+        else:
+            self.N = N.copy()
+            self.c = c.copy()
+        
         self.max_iter = max_iter
         self.track_error = track_error
         self.min_error = min_error
@@ -68,7 +212,7 @@ class ConvexProjectionSolver(ABC):
         self.plot_active_halfspaces = plot_active_halfspaces
 
         # Initialise variables
-        self.n = self.N.shape[0]  # Number of half-spaces
+        self.n = self.N.shape[0]
         self.x = self.z.copy()
         self.errors = np.zeros_like(self.z)
         self.e = [self.errors] * self.n
@@ -76,7 +220,7 @@ class ConvexProjectionSolver(ABC):
         self.path = [self.z.copy()]
         self.active_half_spaces = np.array([[np.zeros_like(self.n) for _ in range(max_iter)]
                                              for _ in range(self.n)])
-        self.actual_projection = find_optimal_solution(self.z, self.N, self.c, dimensions)
+        self.actual_projection = self._find_optimal_solution(self.z, self.N, self.c, dimensions)
         self.squared_errors = np.zeros(max_iter)
         self.stalled_errors = np.zeros(max_iter)
         self.converged_errors = np.zeros(max_iter)
@@ -119,7 +263,7 @@ class ConvexProjectionSolver(ABC):
             index: Error index.
         """
         if self.plot_active_halfspaces:
-            if not is_in_half_space(x_temp + self.e[index], normal, offset):
+            if not self._is_in_half_space(x_temp + self.e[index], normal, offset):
                 self.active_half_spaces[m][i] = 1
 
     def _track_error(self, i: int) -> None:
@@ -197,7 +341,7 @@ class DykstraProjectionSolver(ConvexProjectionSolver):
                 self._check_activity(m, i, x_temp, normal, offset, index)
 
                 # Update x_m+1
-                self.x = project_onto_half_space(x_temp + self.e[index], normal, offset)
+                self.x = self._project_onto_half_space(x_temp + self.e[index], normal, offset)
 
                 # Update e_m
                 self._update_error(m, x_temp, self.x, index)
@@ -247,7 +391,7 @@ class DykstraMapHybridSolver(ConvexProjectionSolver):
         Args:
             i: Current iteration.
         """
-        beta = beta_check(self.x, self.N, self.c)
+        beta = self._beta_check(self.x, self.N, self.c)
         if beta == 1:
             self.e = self.e_dykstra
         else:
@@ -287,7 +431,7 @@ class DykstraMapHybridSolver(ConvexProjectionSolver):
                 self._check_activity(m, i, x_temp, normal, offset, index)
 
                 # Update x_m+1
-                self.x = project_onto_half_space(x_temp + self.e[index], normal, offset)
+                self.x = self._project_onto_half_space(x_temp + self.e[index], normal, offset)
 
                 # Update e_m with Dykstra's method
                 self._update_error(m, x_temp, self.x, index)
@@ -366,7 +510,7 @@ class DykstraStallDetectionSolver(ConvexProjectionSolver):
             # Update all errors for the following round
             for m, (normal, offset) in enumerate(zip(self.N, self.c)):
                 self.e[m] = self.e[m] + n_fast_forward * (self.x_historical[i-1][m-1] - self.x_historical[i-1][m])
-                if not is_in_half_space(self.x + self.e[(m - self.n) % self.n], normal, offset):
+                if not self._is_in_half_space(self.x + self.e[(m - self.n) % self.n], normal, offset):
                     self.active_half_spaces[m][i] = 1
 
             self.stalling = False
@@ -396,7 +540,7 @@ class DykstraStallDetectionSolver(ConvexProjectionSolver):
                 self._check_activity(m, i, x_temp, normal, offset, index)
 
                 # Update x_m+1
-                self.x = project_onto_half_space(x_temp + self.e[index], normal, offset)
+                self.x = self._project_onto_half_space(x_temp + self.e[index], normal, offset)
 
                 # Update e_m
                 self._update_error(m, x_temp, self.x, index)
