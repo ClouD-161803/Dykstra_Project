@@ -1,10 +1,10 @@
 # Dykstra Project
 
 Implementation of Dykstra's algorithm for the Hilbert space projection of an initial point onto the intersection of multiple convex sets (halfspaces). Implementation of a modified version of the algorithm that is immune to stalling.
-Project completed in 2nd Year and funded by Keble Research Grant
+Project completed in 2nd Year and funded by Keble Research Grant KSRG118
 
 - LaTeX directory for up-to-date version of the report: /Latex/Current Version
-- Python directory for up-to-date version of the codespace: /Python/Working Version
+- Python directory for up-to-date version of the codespace: /Python/Working Version --> Run main.py
 
 ## STRUCTURE:
 
