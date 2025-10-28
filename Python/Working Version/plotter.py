@@ -179,7 +179,7 @@ def plot_path(path: list, ax, errors_for_plotting: np.ndarray=None,
     Can also plot the errors at each iteration.
 
     Args:
-        path: A list of points representing the intermediate steps taken by the algorithm.
+        path: Array points representing the intermediate steps taken by the algorithm.
         ax: Axes handle for plotting.
         errors_for_plotting: Array containing error vectors.
         plot_errors: Boolean to control whether to plot the error vectors.
@@ -187,7 +187,9 @@ def plot_path(path: list, ax, errors_for_plotting: np.ndarray=None,
     Returns:
         None
     """
-
+    # print(f"Path: {path}")
+    flattened_path = path.reshape(-1, 2)
+    # print(f"Flattened path: {flattened_path}")
     # Extract x and y coordinates from the path
     n_spaces = len(active_half_spaces)
     x_coords = [path[0][0]]
@@ -208,26 +210,18 @@ def plot_path(path: list, ax, errors_for_plotting: np.ndarray=None,
     #     if i>0 and (i % n-1 == 0):
     #         ax.plot(x_coords[i], y_coords[i], color='red', markersize='2', marker='x')
 
-    # Plot the errors - this is quite complex but follows dykstra's structure
-    # TODO Need to fix this implementation at some point
-    if False: # plot_errors:
-        n = len(errors_for_plotting[0]) # number of halfspaces
-        m = 0 # running index (not sure how else to do this)
-        max_iter = len(errors_for_plotting) - 1 # algorithm iterations
-        iteration = 1 # external for loop iterations
-        for errors in errors_for_plotting:
-            for error in errors:
-                index = (m - n) % (iteration * n) + n
-                if index < max_iter * n:
-                    # debugging prints
-                    # print(f"n: {n} | m: {m} | index: {index} | iteration: {iteration}")
-                    # print(index, (x_coords[index], y_coords[index]), error)
+    # Plot the errors (quivers)
+    if plot_errors and errors_for_plotting is not None:
+        n = errors_for_plotting.shape[1]  # number of halfspaces
+        max_iter = errors_for_plotting.shape[0]  # algorithm iterations
+        for i in range(max_iter):
+            for m in range(n):
+                index = (m - n) % n
+                error = errors_for_plotting[i, m]
+                point = path[i, m]
+                ax.quiver(point[0], point[1], error[0], error[1],
+                          angles='xy', scale_units='xy', scale=1, alpha=0.3)
 
-                    # Plot error vectors as quivers
-                    ax.quiver(x_coords[index], y_coords[index], error[0], error[1],
-                              angles='xy', scale_units='xy', scale=1, alpha=0.3)
-                    m += 1
-            iteration += 1
 
     # Add legend
     ax.legend()
