@@ -39,11 +39,10 @@ def normalise(normal: np.ndarray, offset: np.ndarray) -> tuple:
     norm = np.linalg.norm(normal)
     if norm == 0:  # me and my homies hate division by 0
         raise ValueError("Warning: Zero-norm normal vector encountered.")
-    else:
-        # Normalise normal
-        unit_normal = normal / norm
-        # Normalise offset
-        constant_offset = offset / norm
+    # Normalise normal
+    unit_normal = normal / norm
+    # Normalise offset
+    constant_offset = offset / norm
 
     return unit_normal, constant_offset
 
@@ -135,17 +134,17 @@ def find_optimal_solution(point: np.ndarray, N: np.ndarray, c: np.ndarray,
                           dimensions: int) -> np.ndarray:
     """
     Solves a quadratic programming problem to find the optimal solution that
-    minimizes the Euclidean distance between a given point and a target,
+    minimises the Euclidean distance between a given point and a target,
     subject to linear constraints.
 
-    The function solves the following optimization problem:
+    The function solves the following optimisation problem:
     min_x ∥x − point∥^2 subject to Gx <= h, where G and h represent
     the constraints.
 
     Parameters:
     -----------
     point : A 1D array representing the target point in space for the
-            optimization.
+            optimisation.
 
     N : A 2D array representing the constraint matrix G in the quadratic
             programming formulation.
@@ -154,12 +153,12 @@ def find_optimal_solution(point: np.ndarray, N: np.ndarray, c: np.ndarray,
             quadratic programming formulation.
 
     dimensions : The dimensionality of the space in which
-            the optimization is being performed.
+            the optimisation is being performed.
 
     Returns:
     --------
     The optimal projection of the point, subject to the constraints,
-    which minimizes the quadratic objective function.
+    which minimises the quadratic objective function.
 
     Notes:
     ------

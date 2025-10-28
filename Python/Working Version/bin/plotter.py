@@ -1,5 +1,5 @@
 """
-This module provides functions for visualizing the intersection of
+This module provides functions for visualising the intersection of
 half-spaces in 1D and 2D.
 
 Functions:
@@ -22,7 +22,7 @@ Notes:
 
 Additional Features:
 - Ability to plot on specific axes.
-- Error and active half-space visualization.
+- Error and active half-space visualisation.
 """
 
 
@@ -42,7 +42,7 @@ def plot_2d_space(N: np.ndarray, c: np.ndarray, X: np.ndarray, Y: np.ndarray,
         X: 2D array of x coordinates.
         Y: 2D array of y coordinates.
         label: Label for the plot.
-        cmap: Colormap for the plot.
+        cmap: Colourmap for the plot.
         ax: Axes handle for plotting.
 
     Returns:
@@ -86,7 +86,7 @@ def plot_1d_space(N: np.ndarray, c: np.ndarray, label: str, cmap: str, ax,
         N: Matrix of normal vectors.
         c: Vector of constant offsets.
         label: Label for the plot.
-        cmap: Colormap for the plot.
+        cmap: Colourmap for the plot.
         ax: Axes handle for plotting.
 
     Returns:

@@ -53,8 +53,7 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
                 and errors for plotting (if selected).
     """
 
-
-    # # Eliminate inactive halfspaces (V9)
+    # Eliminate inactive halfspaces (V9)
     if delete_spaces:
         N, c = delete_inactive_half_spaces(z, N, c)
 

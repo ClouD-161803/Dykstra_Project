@@ -1,9 +1,9 @@
 """
-This module provides a unified visualization class for projection results.
+This module provides a unified visualisation class for projection results.
 
 Classes:
-- ProjectionVisualizer:
-    Handles all visualization of projection solver results including half-spaces,
+- ProjectionVisualiser:
+    Handles all visualisation of projection solver results including half-spaces,
     paths, errors, and active half-space tracking.
 """
 
@@ -16,9 +16,9 @@ from matplotlib import cm
 from projection_result import ProjectionResult
 
 
-class ProjectionVisualizer:
+class ProjectionVisualiser:
     """
-    Unified visualization class for projection solver results.
+    Visualisation class for projection solver results.
     
     Attributes:
         result: ProjectionResult object containing solver outputs.
@@ -242,7 +242,7 @@ class ProjectionVisualizer:
             ax.grid(True)
             ax.legend()
 
-    def visualize(self, plot_original_point: np.ndarray | None = None,
+    def visualise(self, plot_original_point: np.ndarray | None = None,
                   plot_optimal_point: np.ndarray | None = None) -> None:
         """
         Create a comprehensive visualization of the projection results.

@@ -125,13 +125,13 @@ class ConvexProjectionSolver(ABC):
                                dimensions: int) -> np.ndarray:
         """
         Solves a quadratic programming problem to find the optimal solution that
-        minimizes the Euclidean distance between a given point and a target,
+        minimises the Euclidean distance between a given point and a target,
         subject to linear constraints.
 
         The function solves: min_x ∥x − point∥^2 subject to Gx <= h.
 
         Args:
-            point: Target point in space for optimization.
+            point: Target point in space for optimisation.
             N: Constraint matrix G in the quadratic programming formulation.
             c: Constraint vector h in the quadratic programming formulation.
             dimensions: Dimensionality of the space.
@@ -183,7 +183,7 @@ class ConvexProjectionSolver(ABC):
                  plot_active_halfspaces: bool = False,
                  delete_spaces: bool = False):
         """
-        Initialize the solver.
+        Initialise the solver.
 
         Args:
             z: Initial point to project.
@@ -241,8 +241,8 @@ class ConvexProjectionSolver(ABC):
 
     def _initialize_iteration(self, i: int) -> None:
         """
-        Initialize variables for the current iteration.
-        Can be overridden by subclasses for custom behavior.
+        Initialise variables for the current iteration.
+        Can be overridden by subclasses for custom behaviour.
 
         Args:
             i: Current iteration number.
@@ -379,14 +379,14 @@ class DykstraMapHybridSolver(ConvexProjectionSolver):
     """
 
     def __init__(self, *args, **kwargs):
-        """Initialize the hybrid solver with separate error vectors for MAP and Dykstra."""
+        """Initialise the hybrid solver with separate error vectors for MAP and Dykstra."""
         super().__init__(*args, **kwargs)
         self.e_dykstra = [self.errors] * self.n
         self.e_MAP = [self.errors] * self.n
 
     def _initialize_iteration(self, i: int) -> None:
         """
-        Initialize iteration by choosing between MAP and Dykstra.
+        Initialise iteration by choosing between MAP and Dykstra.
 
         Args:
             i: Current iteration.
@@ -469,7 +469,7 @@ class DykstraStallDetectionSolver(ConvexProjectionSolver):
     """
 
     def __init__(self, *args, **kwargs):
-        """Initialize the stall detection solver with additional tracking."""
+        """Initialise the stall detection solver with additional tracking."""
         super().__init__(*args, **kwargs)
         self.stalling = False
         self.k_stalling = 1
