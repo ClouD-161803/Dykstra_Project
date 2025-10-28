@@ -63,12 +63,12 @@ def run_with_tracking() -> None:
 
     # # Intersection - no stalling - y y n
     # z = np.array([0.5, 1.75])
-    # x_range = [-2, 2]
-    # y_range = [-2, 2]
+    # x_range = [-2., 2.]
+    # y_range = [-2., 2.]
     # delete_half_spaces = True
 
     # # Very far to the top left - y n y
-    # z = np.array([-10, 5])
+    # z = np.array([-10, 5.])
     # x_range = [-10, 0.5]
     # y_range = [0.5, 6]
     # delete_half_spaces = True
@@ -76,19 +76,19 @@ def run_with_tracking() -> None:
     # # Very far to bottom left - n y y
     # z = np.array([-5, -5])
     # x_range = [-6, 0.5]
-    # y_range = [-6, 4]
-    # delete_half_spaces = False
+    # y_range = [-6, 4.]
+    # delete_half_spaces = True
 
     # # Very far to the top right y y n
     # z = np.array([3.5, 3.5])
-    # x_range = [-1, 4]
-    # y_range = [-1., 4]
+    # x_range = [-1, 4.]
+    # y_range = [-1., 4.]
     # delete_half_spaces = True
 
     # # Very far to the bottom right - y n y
     # z = np.array([10, -5])
-    # x_range = [0, 11]
-    # y_range = [-6, 1]
+    # x_range = [0, 11.]
+    # y_range = [-6, 1.]
     # delete_half_spaces = True
 
     # ===== ALGORITHM CONFIGURATION =====
@@ -108,7 +108,7 @@ def run_with_tracking() -> None:
 
     # ===== SOLVER SELECTION =====
     
-    # Standard Dykstra's Algorithm
+    # # Standard Dykstra's Algorithm
     # solver = DykstraProjectionSolver(
     #     z, A, c, max_iter,
     #     track_error=True,
