@@ -75,12 +75,20 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
 
     # Vector for storing all errors (V8)
     # if plot_errors:
-    errors_for_plotting = np.array([np.zeros_like(e) for _ in range(max_iter)])
+    # errors_for_plotting = np.array([np.zeros_like(e) for _ in range(max_iter)])
     # print(f"Errors for plotting {errors_for_plotting}") for debugging
 
+    # BUGFIX: Previous version
+    errors_for_plotting = [e.copy()] # initialise with all zeros
+    path = [z.copy()]  # Initialize the path with the original point
+    
+
     # Matrix of successive projections
-    x_historical = np.array([[np.zeros_like(z) for _ in range(n)]
-                             for _ in range(max_iter)])
+    # x_historical = np.array([[np.zeros_like(z) for _ in range(n)]
+    #                          for _ in range(max_iter)])
+    
+    
+    
 
     # Active halfspaces vector (V9)
     # if plot_active_halfspaces:
@@ -117,11 +125,15 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
             e[m] =  + e[index] + 1 * (x_temp - x) # change 1 to 0 for MAP
 
             # Path
-            x_historical[i][m] = x.copy()
+            # x_historical[i][m] = x.copy()
+            # BUGFIX: Previous version
+            path.append(x.copy())  # Add the updated x to the path
 
             # Errors
             if plot_errors:
-                errors_for_plotting[i][m] = e[m].copy()
+                # errors_for_plotting[i][m] = e[m].copy()
+                # BUGFIX: Previous version
+                errors_for_plotting.append(e.copy()) # update error matrix
 
         # Track the squared error (V4)
         if track_error:
@@ -147,7 +159,7 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
             squared_errors[i] = error
 
     # Path
-    path = x_historical.copy()
+    # path = x_historical.copy()
 
     # Print path and errors_for_plotting for debugging
     # print(f"Path: {path}")
