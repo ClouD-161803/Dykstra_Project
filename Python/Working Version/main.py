@@ -1,8 +1,8 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-from new_dykstra import dykstra_projection
-from plotter import plot_half_spaces, plot_path, plot_active_spaces
+from convex_projection_solver import (DykstraProjectionSolver,
+                                       DykstraMapHybridSolver,
+                                       DykstraStallDetectionSolver)
+from projection_visualizer import ProjectionVisualizer
 from gradient import quadprog_solve_qp
 from edge_rounder import rounded_box_constraints
 
@@ -87,20 +87,48 @@ def run_with_tracking() -> None:
     # delete_half_spaces = True
 
 
-    # Project using Dykstra's algorithm
+    # Project using solver
     max_iter: int = 50 # number of iterations
     plot_quivers: bool = False # for plotting error quivers
     plot_activity: bool = True # for plotting halfspace activity
+
+    # Project onto box, then line
     A: np.ndarray = np.vstack([N_box, N_line])
     c: np.ndarray = np.hstack([c_box, c_line])
+
+    # Project onto line, then box
     # A: np.ndarray = np.vstack([N_line, N_box])
     # c: np.ndarray = np.hstack([c_line, c_box])
-    projection, path, error_tuple, errs_to_plot, active_half_spaces = (
-        dykstra_projection(z, A, c,
-                           max_iter, track_error=True, plot_errors=plot_quivers,
-                           plot_active_halfspaces=plot_activity,
-                           delete_spaces=delete_half_spaces)
+    
+    # Select Solver
+    # Standard Dykstra's Algorithm
+    # solver = DykstraProjectionSolver(
+    #     z, A, c, max_iter,
+    #     track_error=True,
+    #     plot_errors=plot_quivers,
+    #     plot_active_halfspaces=plot_activity,
+    #     delete_spaces=delete_half_spaces
+    # )
+    
+    # Hybrid MAP-Dykstra Algorithm
+    # solver = DykstraMapHybridSolver(
+    #     z, A, c, max_iter,
+    #     track_error=True,
+    #     plot_errors=plot_quivers,
+    #     plot_active_halfspaces=plot_activity,
+    #     delete_spaces=delete_half_spaces
+    # )
+    
+    # Dykstra with Stalling Detection
+    solver = DykstraStallDetectionSolver(
+        z, A, c, max_iter,
+        track_error=True,
+        plot_errors=plot_quivers,
+        plot_active_halfspaces=plot_activity,
+        delete_spaces=delete_half_spaces
     )
+    
+    result = solver.solve()
 
     # Compare final result to actual projection (V4)
 
@@ -118,20 +146,13 @@ def run_with_tracking() -> None:
     G = np.vstack([N_box, N_line])
     h = np.hstack([c_box, c_line])
     actual_projection = quadprog_solve_qp(P, q, G, h)
-    distance = actual_projection - projection
+    distance = actual_projection - result.projection
 
     # Compare to dykstra approximation (V4)
     print(f"\n"
         f"\nThe finite time projection over {max_iter} iteration(s) is: "
-        f"{projection};\nThe distance to the optimal solution is: "
+        f"{result.projection};\nThe distance to the optimal solution is: "
         f"{distance}\nThe squared-error is {np.dot(distance, distance)}\n")
-
-    # Create infrastructure for plots
-    fig = plt.figure(figsize=(16, 10))  # Create the figure
-    # This makes the first plot larger
-    gs = gridspec.GridSpec(3, 2)  # 3 rows, 2 columns
-    ax1 = fig.add_subplot(gs[:2, 0])  # First subplot spans the top two rows of first column
-    ax2 = fig.add_subplot(gs[2, 0])  # Second subplot occupies the bottom row of first column
 
     # Visualize the results
     Nc_pairs = [
@@ -139,61 +160,10 @@ def run_with_tracking() -> None:
         ("Line", "Greys", N_line, c_line)
     ]
 
-    # Modified everything to accept an axis handle (V4)
+    # Create visualizer and display results
+    visualizer = ProjectionVisualizer(result, Nc_pairs, max_iter, x_range, y_range)
+    visualizer.visualize(plot_original_point=z, plot_optimal_point=actual_projection)
 
-    # Plot the half spaces
-    plot_half_spaces(Nc_pairs, max_iter, ax1, x_range, y_range)
-    # Plot the path (V8)
-    plot_path(path, ax1, errs_to_plot, plot_errors=plot_quivers, active_half_spaces=active_half_spaces)
-
-    # Plot the original point and its projection
-    ax1.scatter(z[0], z[1], color='green', marker='o', label='Original Point')
-    ax1.scatter(projection[0], projection[1], color='green', marker='x',
-                label='Projection')
-    # Plot optimal solution (V4)
-    ax1.scatter(actual_projection[0], actual_projection[1],
-                color='red', marker='x', label='Optimal Solution')
-    # Set legend for first plot
-    ax1.legend()
-
-    # Plot the squared errors
-    iterations = np.arange(0, max_iter, 1)
-    last_error = error_tuple[0][-1] # get the last error for printing
-    error_tuple[0][-1] = None # set this to None so that we can see last error
-    ax2.plot(iterations, error_tuple[0], color='red',
-             label='Errors', linestyle='-', marker='o')
-    # Plot the stalling errors
-    ax2.plot(iterations, error_tuple[1], color='#D5B60A',
-             label='Stalling', linestyle='-', marker='o')
-    # Plot the converged errors
-    ax2.plot(iterations, error_tuple[2], color='green',
-             label='Converged\n(error under 1e-3)', linestyle='-', marker='o')
-    # Plot the last error
-    ax2.scatter(iterations[-1], last_error,
-                color='#8B0000', marker='o',
-                label=f'Final error is {format(last_error, ".2e")}')
-
-    # Set labels, title and legend for second plot
-    ax2.set_xlabel('Number of Iterations')  # Add x-axis label
-    ax2.set_ylabel('Squared Errors')  # Add y-axis label
-    ax2.set_title('Convergence of Squared Errors')
-    ax2.grid(True)
-    ax2.legend()
-
-    # Plot active halfspaces
-    if plot_activity:
-        plot_active_spaces(active_half_spaces, max_iter, fig, gs)
-
-    # Show the plot
-    plt.subplots_adjust(hspace=0.3)
-    plt.tight_layout()
-    plt.show()
-
-    # Debugging info
-    # print(errs_to_plot)
-    # print(path)
-    # print(len(path))
-    # print(len(errs_to_plot[0]))
 
 if __name__ == "__main__":
     run_with_tracking()
