@@ -171,7 +171,7 @@ def plot_half_spaces(Nc_pairs: list, num_of_iterations: int, ax,
               f"Check the format of Nc_pairs or the dimensions of N.")
 
 
-def plot_path(path: list, ax, errors_for_plotting: np.ndarray=None,
+def plot_path(path: list, ax, errors_for_plotting=None,
               plot_errors: bool=False, active_half_spaces=None) -> None:
     """
     Plots the path followed by Dykstra's algorithm during projection.
@@ -188,22 +188,29 @@ def plot_path(path: list, ax, errors_for_plotting: np.ndarray=None,
         None
     """
     # print(f"Path: {path}")
-    flattened_path = path.reshape(-1, 2)
+    # flattened_path = path.reshape(-1, 2)
     # print(f"Flattened path: {flattened_path}")
     # Extract x and y coordinates from the path
-    n_spaces = len(active_half_spaces)
+    n_spaces = len(active_half_spaces) if active_half_spaces is not None else 0
     x_coords = [path[0][0]]
     y_coords = [path[0][1]]
-    x_coords.extend([point[0] for i, point in enumerate(path[1:-1]) if active_half_spaces[i % n_spaces][i // n_spaces] == 1])
-    y_coords.extend([point[1] for i, point in enumerate(path[1:-1]) if active_half_spaces[i % n_spaces][i // n_spaces] == 1])
+    if active_half_spaces is not None:
+        x_coords.extend([point[0] for i, point in enumerate(path[1:-1]) if active_half_spaces[i % n_spaces][i // n_spaces] == 1])
+        y_coords.extend([point[1] for i, point in enumerate(path[1:-1]) if active_half_spaces[i % n_spaces][i // n_spaces] == 1])
+
+    # Old
     # x_coords = [point[0] for i, point in enumerate(path[:-1])]
     # y_coords = [point[1] for i, point in enumerate(path[:-1])]
+
+    # From the parallel_plotting branch
+    # x_coords = [point[0] for point in flattened_path]
+    # y_coords = [point[1] for point in flattened_path]
 
     # Plot the path
     ax.plot(x_coords, y_coords, marker='.', linestyle='--',
              color='blue', linewidth=0.5, markersize=1,
              label='Projection Path')
-    n = len(errors_for_plotting[0]) # number of halfspaces
+    n = len(errors_for_plotting[0]) if errors_for_plotting is not None else 0  # number of halfspaces
     # n_coords = len(x_coords)
     # print(active_half_spaces)
     # for i in range(n_coords):
@@ -216,9 +223,9 @@ def plot_path(path: list, ax, errors_for_plotting: np.ndarray=None,
         max_iter = errors_for_plotting.shape[0]  # algorithm iterations
         for i in range(max_iter):
             for m in range(n):
-                index = (m - n) % n
+                # index = (m - n) % n
                 error = errors_for_plotting[i, m]
-                point = path[i, m]
+                point = path[i][m]
                 ax.quiver(point[0], point[1], error[0], error[1],
                           angles='xy', scale_units='xy', scale=1, alpha=0.3)
 

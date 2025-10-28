@@ -28,7 +28,7 @@ from dykstra_functions import (is_in_half_space,
 
 def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
                        max_iter: int, track_error: bool=False,
-                       min_error: int=1e-3, dimensions: int=2,
+                       min_error: float=1e-3, dimensions: int=2,
                        plot_errors: bool=False,
                        plot_active_halfspaces: bool=False,
                        delete_spaces: bool=False) -> tuple:
@@ -97,8 +97,8 @@ def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
     # print(f"x_historical: {x_historical}") # for debugging
     # print((np.array(x_historical).shape)) # for debugging
     # print((np.array(errors_for_plotting).shape)) # for debugging
-#     x_historical = [[np.zeros_like(z) for _ in range(n)] for _ in range(max_iter)]
-#     prev_x_no_ffw = None # not sure what this is
+    x_historical = [[np.zeros_like(z) for _ in range(n)] for _ in range(max_iter)]
+    prev_x_no_ffw = None # not sure what this is
 
     # Optimal solution (V4)
     actual_projection = find_optimal_solution(z, N, c, dimensions)

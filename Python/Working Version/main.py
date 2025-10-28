@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-from new_dykstra import dykstra_projection
+from dykstra import dykstra_projection
 from plotter import plot_half_spaces, plot_path, plot_active_spaces
 from gradient import quadprog_solve_qp
 from edge_rounder import rounded_box_constraints
@@ -89,10 +89,10 @@ def run_with_tracking() -> None:
 
     # Project using Dykstra's algorithm
     max_iter: int = 50 # number of iterations
-    plot_quivers: bool = True # for plotting error quivers
-    plot_activity: bool = True # for plotting halfspace activity
-    A: np.ndarray = np.vstack([N_box, N_line])
-    c: np.ndarray = np.hstack([c_box, c_line])
+    plot_quivers: bool = False # for plotting error quivers
+    plot_activity: bool = False # for plotting halfspace activity
+    # A: np.ndarray = np.vstack([N_box, N_line])
+    # c: np.ndarray = np.hstack([c_box, c_line])
     A: np.ndarray = np.vstack([N_line, N_box])
     c: np.ndarray = np.hstack([c_line, c_box])
     projection, path, error_tuple, errs_to_plot, active_half_spaces = (

@@ -26,7 +26,7 @@ from dykstra_functions import (is_in_half_space,
 
 def dykstra_projection(z: np.ndarray, N: np.ndarray, c: np.ndarray,
                        max_iter: int, track_error: bool=False,
-                       min_error: int=1e-3, dimensions: int=2,
+                       min_error: float=1e-3, dimensions: int=2,
                        plot_errors: bool=False,
                        plot_active_halfspaces: bool=False,
                        delete_spaces: bool=False) -> tuple:
