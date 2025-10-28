@@ -13,7 +13,7 @@ import numpy as np
 from convex_projection_solver import (DykstraProjectionSolver,
                                        DykstraMapHybridSolver,
                                        DykstraStallDetectionSolver)
-from projection_visualiser import ProjectionVisualiser
+from visualiser import Visualiser
 
 
 def run_with_tracking() -> None:
@@ -157,7 +157,7 @@ def run_with_tracking() -> None:
     ]
 
     # Visualize results
-    visualiser = ProjectionVisualiser(result, Nc_pairs, max_iter, x_range, y_range)
+    visualiser = Visualiser(result, Nc_pairs, max_iter, x_range, y_range)
     visualiser.visualise(plot_original_point=z, plot_optimal_point=actual_projection)
 
 

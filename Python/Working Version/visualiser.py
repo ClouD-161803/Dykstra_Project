@@ -16,7 +16,7 @@ from matplotlib import cm
 from projection_result import ProjectionResult
 
 
-class ProjectionVisualiser:
+class Visualiser:
     """
     Visualisation class for projection solver results.
     
