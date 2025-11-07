@@ -9,7 +9,7 @@ from convex_projection_solver import (DykstraProjectionSolver,
 from visualiser import Visualiser, VerticalVisualiser
 
 
-def run_with_tracking() -> None:
+def run() -> None:
     """Tests Dykstra's algorithm on the intersection of a box at the origin
     and a line passing through (2, 0) and (0, 1)"""
     # --- Define Problem ---
@@ -102,14 +102,14 @@ def run_with_tracking() -> None:
 
     # --- Solver Selection ---
     
-    # # * Standard Dykstra's Algorithm
-    # solver = DykstraProjectionSolver(
-    #     z, A, c, max_iter,
-    #     track_error=True,
-    #     plot_errors=plot_quivers,
-    #     plot_active_halfspaces=plot_activity,
-    #     delete_spaces=delete_half_spaces
-    # )
+    # * Standard Dykstra's Algorithm
+    solver = DykstraProjectionSolver(
+        z, A, c, max_iter,
+        track_error=True,
+        plot_errors=plot_quivers,
+        plot_active_halfspaces=plot_activity,
+        delete_spaces=delete_half_spaces
+    )
     
     # # * Hybrid MAP-Dykstra Algorithm
     # solver = DykstraMapHybridSolver(
@@ -120,14 +120,14 @@ def run_with_tracking() -> None:
     #     delete_spaces=delete_half_spaces
     # )
 
-    # * Dykstra with Stalling Detection
-    solver = DykstraStallDetectionSolver(
-        z, A, c, max_iter,
-        track_error=True,
-        plot_errors=plot_quivers,
-        plot_active_halfspaces=plot_activity,
-        delete_spaces=delete_half_spaces
-    )
+    # # * Dykstra with Stalling Detection
+    # solver = DykstraStallDetectionSolver(
+    #     z, A, c, max_iter,
+    #     track_error=True,
+    #     plot_errors=plot_quivers,
+    #     plot_active_halfspaces=plot_activity,
+    #     delete_spaces=delete_half_spaces
+    # )
     
 
     solver_name = solver.__class__.__name__
@@ -159,4 +159,4 @@ def run_with_tracking() -> None:
 
 
 if __name__ == "__main__":
-    run_with_tracking()
+    run()

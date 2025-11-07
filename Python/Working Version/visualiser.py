@@ -51,6 +51,10 @@ class Visualiser:
         self.fig: Figure | None = None
         self.ax_main: Axes | None = None
         self.ax_error: Axes | None = None
+        self.fontsize_title = 16
+        self.fontsize_label = 14
+        self.fontsize_tick = 12
+        self.fontsize_legend = 14
 
     def plot_2d_space(self, N: np.ndarray, c: np.ndarray, X: np.ndarray, Y: np.ndarray,
                       label: str, cmap: str, ax: Axes) -> None:
@@ -127,11 +131,12 @@ class Visualiser:
                                    "Please provide N and c for 1D or 2D cases.")
 
             ax.set_aspect('equal')
-            ax.set_xlabel('x')
-            ax.set_ylabel('y')
-            ax.set_title(f"{self.solver_name} executed for {self.max_iter - 1} iterations")
+            ax.set_xlabel('X', fontsize=self.fontsize_label)
+            ax.set_ylabel('Y', fontsize=self.fontsize_label)
+            ax.set_title(f"{self.solver_name} executed for {self.max_iter - 1} iterations", fontsize=self.fontsize_title)
+            ax.tick_params(axis='both', which='major', labelsize=self.fontsize_tick)
             ax.grid(True)
-            ax.legend()
+            ax.legend(fontsize=self.fontsize_legend)
 
         except TypeError as e:
             print(f"TypeError occurred: {e}. "
@@ -213,12 +218,13 @@ class Visualiser:
                    color='green', marker='*', s=100, zorder=5,
                    label=f'final error is {format(squared_errors[-1], ".2e")}')
 
-        ax.set_xlabel('iteration')
-        ax.set_ylabel('squared errors')
-        ax.set_title('convergence of squared errors')
+        ax.set_xlabel('iteration', fontsize=self.fontsize_label)
+        ax.set_ylabel('squared errors', fontsize=self.fontsize_label)
+        ax.set_title('convergence of squared errors', fontsize=self.fontsize_title)
+        ax.tick_params(axis='both', which='major', labelsize=self.fontsize_tick)
         ax.grid(True, axis='x', alpha=0.3)
         ax.locator_params(axis='y', nbins=5)
-        ax.legend()
+        ax.legend(fontsize=self.fontsize_legend)
 
     def plot_active_halfspaces(self, fig: Figure, gs: gridspec.GridSpec) -> None:
         """
@@ -253,19 +259,20 @@ class Visualiser:
             
             ax.set_ylim(-0.1, 1.1)
             ax.set_yticks([0, 1])
-            ax.set_yticklabels(['inactive', 'active'])
+            ax.set_yticklabels(['inactive', 'active'], fontsize=self.fontsize_tick)
+            ax.tick_params(axis='x', which='major', labelsize=self.fontsize_tick)
             
             # Only show x-axis labels on the bottom plot
             if i < num_of_spaces - 1:
                 ax.set_xticklabels([])
             else:
-                ax.set_xlabel('iteration')
+                ax.set_xlabel('iteration', fontsize=self.fontsize_label)
 
             if i == 0:
-                ax.set_title('halfspace activity')
+                ax.set_title('halfspace activity', fontsize=self.fontsize_title)
 
             ax.grid(True, axis='x', alpha=0.3)
-            ax.legend(loc='center right')
+            ax.legend(loc='center right', fontsize=self.fontsize_legend)
 
     def visualise(self, plot_original_point: np.ndarray | None = None,
                   plot_optimal_point: np.ndarray | None = None) -> None:
@@ -301,7 +308,7 @@ class Visualiser:
             self.ax_main.scatter(plot_optimal_point[0], plot_optimal_point[1],
                                color='green', marker='*', s=40, label='optimal solution', zorder=5)
 
-        self.ax_main.legend()
+        self.ax_main.legend(fontsize=self.fontsize_legend)
 
         if self.result.squared_errors is not None:
             self.plot_errors(self.ax_error)
@@ -366,7 +373,7 @@ class VerticalVisualiser(Visualiser):
             self.ax_main.scatter(plot_optimal_point[0], plot_optimal_point[1],
                                color='red', marker='*', s=50, label='optimal solution', zorder=5)
 
-        self.ax_main.legend()
+        self.ax_main.legend(fontsize=self.fontsize_legend)
 
         if self.result.squared_errors is not None:
             self.plot_errors(self.ax_error)
@@ -388,11 +395,12 @@ class VerticalVisualiser(Visualiser):
             
             self.ax_activity.set_ylim(-0.1, 1.1)
             self.ax_activity.set_yticks([0, 1])
-            self.ax_activity.set_yticklabels(['0', '1'])
-            self.ax_activity.set_xlabel('iteration')
-            self.ax_activity.set_ylabel('halfspace activity')
+            self.ax_activity.set_yticklabels(['0', '1'], fontsize=self.fontsize_tick)
+            self.ax_activity.tick_params(axis='x', which='major', labelsize=self.fontsize_tick)
+            self.ax_activity.set_xlabel('iteration', fontsize=self.fontsize_label)
+            self.ax_activity.set_ylabel('halfspace activity', fontsize=self.fontsize_label)
             self.ax_activity.grid(True, axis='x', alpha=0.3)
-            self.ax_activity.legend(loc='center right')
+            self.ax_activity.legend(loc='center right', fontsize=self.fontsize_legend)
 
         plt.subplots_adjust(hspace=0.4)
         plt.tight_layout()
