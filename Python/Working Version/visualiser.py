@@ -129,7 +129,7 @@ class Visualiser:
             ax.set_aspect('equal')
             ax.set_xlabel('x')
             ax.set_ylabel('y')
-            ax.set_title(f"{self.solver_name} executed for {self.max_iter} iterations")
+            ax.set_title(f"{self.solver_name} executed for {self.max_iter - 1} iterations")
             ax.grid(True)
             ax.legend()
 
@@ -209,7 +209,7 @@ class Visualiser:
                 label='stalling', linestyle='-', marker='o', markersize=4)
         ax.plot(iterations, converged_errors, color='green',
                 label='converged\n(error under 1e-3)', linestyle='-', marker='o', markersize=4)
-        ax.scatter(self.max_iter, squared_errors[-1],
+        ax.scatter(self.max_iter - 1, squared_errors[-1],
                    color='#8B0000', marker='*', s=100, zorder=5,
                    label=f'final error is {format(squared_errors[-1], ".2e")}')
 
@@ -222,6 +222,7 @@ class Visualiser:
     def plot_active_halfspaces(self, fig: Figure, gs: gridspec.GridSpec) -> None:
         """
         Plot the activity of half-spaces over iterations.
+        Colors match the error tracking per iteration: green for converged, yellow for stalling, red for errors.
 
         Args:
             fig: Figure handle.
@@ -241,8 +242,14 @@ class Visualiser:
                 continue
             
             active_space = active_spaces[i]
+            
+            # Plot the active space data in black
             ax.plot(iterations, active_space, color='black',
-                   label=f'halfspace {i}', linestyle='-', marker='o', linewidth=1.5, markersize=4)
+                   linestyle='-', marker='o', linewidth=1.5, markersize=4)
+            
+            # Add legend entry
+            ax.plot([], [], color='black', label=f'halfspace {i}', linestyle='-', marker='o', linewidth=1.5, markersize=4)
+            
             ax.set_ylim(-0.1, 1.1)
             ax.set_yticks([0, 1])
             ax.set_yticklabels(['inactive', 'active'])
@@ -256,9 +263,7 @@ class Visualiser:
             if i == 0:
                 ax.set_title('halfspace activity')
 
-            # Vertical gridlines only
             ax.grid(True, axis='x', alpha=0.3)
-            # Position legend in the middle right
             ax.legend(loc='center right')
 
     def visualise(self, plot_original_point: np.ndarray | None = None,
@@ -286,14 +291,14 @@ class Visualiser:
 
         if plot_original_point is not None:
             self.ax_main.scatter(plot_original_point[0], plot_original_point[1],
-                               color='green', marker='o', label='original point', zorder=5)
+                               color='red', marker='o', label='original point', zorder=5)
 
         self.ax_main.scatter(self.result.projection[0], self.result.projection[1],
                            color='#8B0000', marker='*', s=100, label='projection', zorder=5)
 
         if plot_optimal_point is not None:
             self.ax_main.scatter(plot_optimal_point[0], plot_optimal_point[1],
-                               color='red', marker='*', s=50, label='optimal solution', zorder=5)
+                               color='green', marker='*', s=40, label='optimal solution', zorder=5)
 
         self.ax_main.legend()
 
