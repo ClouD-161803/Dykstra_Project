@@ -50,43 +50,43 @@ def run_with_tracking() -> None:
 
     # Point to project and x-y range (uncomment wanted example)
 
-    # Simple top left - stalling - y y y
+    # # * Simple top left - stalling - y y y
     z = np.array([-4., 1.4])
     x_range = [-2.5, 0.5]
     y_range = [0.5, 2.25]
     delete_half_spaces = True
 
-    # # Simple top left - no stalling - y y y
+    # # * Simple top left - no stalling - y y y
     # z = np.array([-0.75, 1.3])
     # x_range = [-1.8, 0.5]
     # y_range = [0.5, 2.]
     # delete_half_spaces = True
 
-    # # Intersection - no stalling - y y n
+    # # * Intersection - no stalling - y y n
     # z = np.array([0.5, 1.75])
     # x_range = [-2., 2.]
     # y_range = [-2., 2.]
     # delete_half_spaces = True
 
-    # # Very far to the top left - y n y
+    # # * Very far to the top left - y n y
     # z = np.array([-10, 5.])
     # x_range = [-10, 0.5]
     # y_range = [0.5, 6]
     # delete_half_spaces = True
 
-    # # Very far to bottom left - n y y
+    # # * Very far to bottom left - n y y
     # z = np.array([-5, -5])
     # x_range = [-6, 0.5]
     # y_range = [-6, 4.]
     # delete_half_spaces = True
 
-    # # Very far to the top right y y n
+    # # * Very far to the top right y y n
     # z = np.array([3.5, 3.5])
     # x_range = [-1, 4.]
     # y_range = [-1., 4.]
     # delete_half_spaces = True
 
-    # # Very far to the bottom right - y n y
+    # # * Very far to the bottom right - y n y
     # z = np.array([10, -5])
     # x_range = [0, 11.]
     # y_range = [-6, 1.]
@@ -109,7 +109,7 @@ def run_with_tracking() -> None:
 
     # --- Solver Selection ---
     
-    # # Standard Dykstra's Algorithm
+    # # * Standard Dykstra's Algorithm
     # solver = DykstraProjectionSolver(
     #     z, A, c, max_iter,
     #     track_error=True,
@@ -118,7 +118,7 @@ def run_with_tracking() -> None:
     #     delete_spaces=delete_half_spaces
     # )
     
-    # # Hybrid MAP-Dykstra Algorithm
+    # # * Hybrid MAP-Dykstra Algorithm
     # solver = DykstraMapHybridSolver(
     #     z, A, c, max_iter,
     #     track_error=True,
@@ -126,8 +126,8 @@ def run_with_tracking() -> None:
     #     plot_active_halfspaces=plot_activity,
     #     delete_spaces=delete_half_spaces
     # )
-    
-    # Dykstra with Stalling Detection
+
+    # * Dykstra with Stalling Detection
     solver = DykstraStallDetectionSolver(
         z, A, c, max_iter,
         track_error=True,

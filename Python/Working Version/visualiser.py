@@ -155,11 +155,9 @@ class Visualiser:
         if path.ndim != 3:
             print("Path has unexpected shape.")
             return
-        
-        # Flatten path for plotting - this includes all points from all iterations and half-spaces
+
         flattened_path = path.reshape(-1, path.shape[-1])
         
-        # Extract x and y coordinates from the path
         x_coords = [point[0] for point in flattened_path]
         y_coords = [point[1] for point in flattened_path]
 
@@ -269,13 +267,10 @@ class Visualiser:
             print("Failed to create axes.")
             return
 
-        # Plot half-spaces
         self.plot_half_spaces(self.ax_main)
 
-        # Plot path
         self.plot_path(self.ax_main)
 
-        # Plot points
         if plot_original_point is not None:
             self.ax_main.scatter(plot_original_point[0], plot_original_point[1],
                                color='green', marker='o', label='Original Point')
@@ -289,15 +284,12 @@ class Visualiser:
 
         self.ax_main.legend()
 
-        # Plot errors if available
         if self.result.squared_errors is not None:
             self.plot_errors(self.ax_error)
 
-        # Plot active halfspaces if available
         if self.result.active_half_spaces is not None:
             self.plot_active_halfspaces(self.fig, gs)
 
-        # Adjust layout
         plt.subplots_adjust(hspace=0.3)
         plt.tight_layout()
         plt.show()
