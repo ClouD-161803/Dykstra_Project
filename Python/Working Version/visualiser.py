@@ -204,18 +204,18 @@ class Visualiser:
         iterations = np.arange(0, self.max_iter, 1)
         
         ax.plot(iterations, squared_errors, color='red',
-                label='errors', linestyle='-', marker='o')
+                label='errors', linestyle='-', marker='o', markersize=4)
         ax.plot(iterations, stalled_errors, color='#D5B60A',
-                label='stalling', linestyle='-', marker='o')
+                label='stalling', linestyle='-', marker='o', markersize=4)
         ax.plot(iterations, converged_errors, color='green',
-                label='converged\n(error under 1e-3)', linestyle='-', marker='o')
-        ax.scatter(iterations[-1], squared_errors[-1],
-                   color='#8B0000', marker='o',
+                label='converged\n(error under 1e-3)', linestyle='-', marker='o', markersize=4)
+        ax.scatter(self.max_iter, squared_errors[-1],
+                   color='#8B0000', marker='*', s=100, zorder=5,
                    label=f'final error is {format(squared_errors[-1], ".2e")}')
 
-        ax.set_xlabel('Number of Iterations')
+        ax.set_xlabel('Iteration')
         ax.set_ylabel('Squared Errors')
-        ax.set_title('Convergence of Squared Errors')
+        ax.set_title('convergence of squared errors')
         ax.grid(True)
         ax.legend()
 
@@ -242,14 +242,24 @@ class Visualiser:
             
             active_space = active_spaces[i]
             ax.plot(iterations, active_space, color='black',
-                   label=f'halfspace {i}', linestyle='-', marker='o')
-            ax.set_ylim(0, 1)
+                   label=f'halfspace {i}', linestyle='-', marker='o', linewidth=1.5)
+            ax.set_ylim(-0.1, 1.1)
+            ax.set_yticks([0, 1])
+            ax.set_yticklabels(['inactive', 'active'])
+            
+            # Only show x-axis labels on the bottom plot
+            if i < num_of_spaces - 1:
+                ax.set_xticklabels([])
+            else:
+                ax.set_xlabel('Iteration')
 
             if i == 0:
-                ax.set_title('Halfspace Activity')
+                ax.set_title('halfspace activity')
 
-            ax.grid(True)
-            ax.legend()
+            # Vertical gridlines only
+            ax.grid(True, axis='x', alpha=0.3)
+            # Position legend in the middle right
+            ax.legend(loc='center right')
 
     def visualise(self, plot_original_point: np.ndarray | None = None,
                   plot_optimal_point: np.ndarray | None = None) -> None:
