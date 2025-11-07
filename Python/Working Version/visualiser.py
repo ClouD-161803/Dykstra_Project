@@ -75,7 +75,7 @@ class Visualiser:
         colourmap = cm.get_cmap(cmap)
         colour = colourmap(0.69)
 
-        ax.contourf(X, Y, Z, cmap=colourmap, alpha=0.5)
+        ax.contourf(X, Y, Z, levels=[0.5, 1.5], colors=[colour], alpha=0.5)
         ax.plot([], [], color=colour, alpha=0.5, label=label)
 
     def plot_1d_space(self, N: np.ndarray, c: np.ndarray, label: str, 
@@ -210,13 +210,14 @@ class Visualiser:
         ax.plot(iterations, converged_errors, color='green',
                 label='converged\n(error under 1e-3)', linestyle='-', marker='o', markersize=4)
         ax.scatter(self.max_iter - 1, squared_errors[-1],
-                   color='#8B0000', marker='*', s=100, zorder=5,
+                   color='green', marker='*', s=100, zorder=5,
                    label=f'final error is {format(squared_errors[-1], ".2e")}')
 
         ax.set_xlabel('iteration')
         ax.set_ylabel('squared errors')
         ax.set_title('convergence of squared errors')
-        ax.grid(True)
+        ax.grid(True, axis='x', alpha=0.3)
+        ax.locator_params(axis='y', nbins=5)
         ax.legend()
 
     def plot_active_halfspaces(self, fig: Figure, gs: gridspec.GridSpec) -> None:
@@ -291,10 +292,10 @@ class Visualiser:
 
         if plot_original_point is not None:
             self.ax_main.scatter(plot_original_point[0], plot_original_point[1],
-                               color='red', marker='o', label='original point', zorder=5)
+                               color='blue', marker='o', label='original point', zorder=5)
 
         self.ax_main.scatter(self.result.projection[0], self.result.projection[1],
-                           color='#8B0000', marker='*', s=100, label='projection', zorder=5)
+                           color='green', marker='*', s=100, label='projection', zorder=5)
 
         if plot_optimal_point is not None:
             self.ax_main.scatter(plot_optimal_point[0], plot_optimal_point[1],
@@ -309,5 +310,90 @@ class Visualiser:
             self.plot_active_halfspaces(self.fig, gs)
 
         plt.subplots_adjust(hspace=0.3)
+        plt.tight_layout()
+        plt.show()
+
+
+class VerticalVisualiser(Visualiser):
+    """
+    Extended visualiser that arranges all graphs vertically in a single column.
+    Inherits from Visualiser and overrides the visualise method to create a 
+    different layout with smaller halfspace activity plots.
+    """
+
+    def visualise(self, plot_original_point: np.ndarray | None = None,
+                  plot_optimal_point: np.ndarray | None = None) -> None:
+        """
+        Create a vertical layout visualisation with:
+        - Main projection plot (top)
+        - Error convergence plot (middle)
+        - Halfspace activity plots stacked vertically (bottom, smaller)
+
+        Args:
+            plot_original_point: Original point z (optional).
+            plot_optimal_point: Optimal solution (optional).
+        """
+        # Determine grid height
+        if self.result.active_half_spaces is not None:
+            num_halfspaces = self.result.active_half_spaces.shape[0]
+            total_rows = 4 + 3 + 2
+        else:
+            num_halfspaces = 0
+            total_rows = 7
+
+        self.fig = plt.figure(figsize=(12, 10))
+        gs = gridspec.GridSpec(total_rows, 1)
+        
+        self.ax_main = self.fig.add_subplot(gs[0:4, 0])
+        self.ax_error = self.fig.add_subplot(gs[4:7, 0])
+        self.ax_activity = self.fig.add_subplot(gs[7:9, 0]) if num_halfspaces > 0 else None
+
+        if self.ax_main is None or self.ax_error is None:
+            print("Failed to create axes.")
+            return
+
+        self.plot_half_spaces(self.ax_main)
+        self.plot_path(self.ax_main)
+
+        if plot_original_point is not None:
+            self.ax_main.scatter(plot_original_point[0], plot_original_point[1],
+                               color='blue', marker='o', label='original point', zorder=5)
+
+        self.ax_main.scatter(self.result.projection[0], self.result.projection[1],
+                           color='green', marker='*', s=100, label='projection', zorder=5)
+
+        if plot_optimal_point is not None:
+            self.ax_main.scatter(plot_optimal_point[0], plot_optimal_point[1],
+                               color='red', marker='*', s=50, label='optimal solution', zorder=5)
+
+        self.ax_main.legend()
+
+        if self.result.squared_errors is not None:
+            self.plot_errors(self.ax_error)
+            self.ax_error.set_title('')
+            self.ax_error.set_xlabel('')
+            self.ax_error.set_xticklabels([])
+
+        if self.result.active_half_spaces is not None and self.ax_activity is not None:
+            iterations = np.arange(0, self.max_iter, 1)
+            active_spaces = self.result.active_half_spaces
+            markers = ['o', 's', '^', 'D', 'v', '<', '>', 'p', '*', 'h']
+            
+            for i in range(num_halfspaces):
+                marker = markers[i % len(markers)]
+                active_space = active_spaces[i]
+                self.ax_activity.plot(iterations, active_space, color='black',
+                                     linestyle='-', marker=marker, linewidth=1.5, markersize=4,
+                                     label=f'halfspace {i}')
+            
+            self.ax_activity.set_ylim(-0.1, 1.1)
+            self.ax_activity.set_yticks([0, 1])
+            self.ax_activity.set_yticklabels(['0', '1'])
+            self.ax_activity.set_xlabel('iteration')
+            self.ax_activity.set_ylabel('halfspace activity')
+            self.ax_activity.grid(True, axis='x', alpha=0.3)
+            self.ax_activity.legend(loc='center right')
+
+        plt.subplots_adjust(hspace=0.4)
         plt.tight_layout()
         plt.show()

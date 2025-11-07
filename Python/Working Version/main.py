@@ -1,19 +1,12 @@
 """
 Main script for running Dykstra's projection algorithm.
-
-This script handles:
-- Configuration of problem parameters
-- Solver selection and execution
-- Visualisation of results
-
-The actual computation and comparisons are delegated to the solver and visualiser classes.
 """
 
 import numpy as np
 from convex_projection_solver import (DykstraProjectionSolver,
                                        DykstraMapHybridSolver,
                                        DykstraStallDetectionSolver)
-from visualiser import Visualiser
+from visualiser import Visualiser, VerticalVisualiser
 
 
 def run_with_tracking() -> None:
@@ -52,8 +45,8 @@ def run_with_tracking() -> None:
 
     # # * Simple top left - stalling - y y y
     z = np.array([-4., 1.4])
-    x_range = [-4.25, 0.5]
-    y_range = [0, 2.5]
+    x_range = [-2.25, 0.5]
+    y_range = [0.5, 2]
     delete_half_spaces = True
 
     # # * Simple top left - no stalling - y y y
@@ -109,14 +102,14 @@ def run_with_tracking() -> None:
 
     # --- Solver Selection ---
     
-    # * Standard Dykstra's Algorithm
-    solver = DykstraProjectionSolver(
-        z, A, c, max_iter,
-        track_error=True,
-        plot_errors=plot_quivers,
-        plot_active_halfspaces=plot_activity,
-        delete_spaces=delete_half_spaces
-    )
+    # # * Standard Dykstra's Algorithm
+    # solver = DykstraProjectionSolver(
+    #     z, A, c, max_iter,
+    #     track_error=True,
+    #     plot_errors=plot_quivers,
+    #     plot_active_halfspaces=plot_activity,
+    #     delete_spaces=delete_half_spaces
+    # )
     
     # # * Hybrid MAP-Dykstra Algorithm
     # solver = DykstraMapHybridSolver(
@@ -127,14 +120,14 @@ def run_with_tracking() -> None:
     #     delete_spaces=delete_half_spaces
     # )
 
-    # # * Dykstra with Stalling Detection
-    # solver = DykstraStallDetectionSolver(
-    #     z, A, c, max_iter,
-    #     track_error=True,
-    #     plot_errors=plot_quivers,
-    #     plot_active_halfspaces=plot_activity,
-    #     delete_spaces=delete_half_spaces
-    # )
+    # * Dykstra with Stalling Detection
+    solver = DykstraStallDetectionSolver(
+        z, A, c, max_iter,
+        track_error=True,
+        plot_errors=plot_quivers,
+        plot_active_halfspaces=plot_activity,
+        delete_spaces=delete_half_spaces
+    )
     
 
     solver_name = solver.__class__.__name__
@@ -143,25 +136,25 @@ def run_with_tracking() -> None:
     
     result = solver.solve()
     
-    # Get comparison data from solver
     actual_projection = solver.actual_projection
     distance = actual_projection - result.projection
 
-    # Print results
     print(f"\nThe finite time projection over {max_iter} iteration(s) is: "
           f"{result.projection}")
     print(f"The distance to the optimal solution is: {distance}")
     print(f"The squared-error is {np.dot(distance, distance)}\n")
 
-    # Prepare visualisation data
     Nc_pairs = [
         (f"'box'\n(rounded by {corner_count} corner(s))" if corner_count > 1 else "box", 
          "Greys", N_box, c_box),
         ("line", "Greys", N_line, c_line)
     ]
 
-    # Visualize results
-    visualiser = Visualiser(result, Nc_pairs, max_iter, x_range, y_range, solver_name)
+    # # * Vertical Layout
+    visualiser = VerticalVisualiser(result, Nc_pairs, max_iter, x_range, y_range, solver_name)
+    # # * Horizontal Layout
+    # visualiser = Visualiser(result, Nc_pairs, max_iter, x_range, y_range, solver_name)
+
     visualiser.visualise(plot_original_point=z, plot_optimal_point=actual_projection)
 
 
