@@ -127,8 +127,8 @@ class Visualiser:
                                    "Please provide N and c for 1D or 2D cases.")
 
             ax.set_aspect('equal')
-            ax.set_xlabel('X')
-            ax.set_ylabel('Y')
+            ax.set_xlabel('x')
+            ax.set_ylabel('y')
             ax.set_title(f"{self.solver_name} executed for {self.max_iter} iterations")
             ax.grid(True)
             ax.legend()
@@ -213,8 +213,8 @@ class Visualiser:
                    color='#8B0000', marker='*', s=100, zorder=5,
                    label=f'final error is {format(squared_errors[-1], ".2e")}')
 
-        ax.set_xlabel('Iteration')
-        ax.set_ylabel('Squared Errors')
+        ax.set_xlabel('iteration')
+        ax.set_ylabel('squared errors')
         ax.set_title('convergence of squared errors')
         ax.grid(True)
         ax.legend()
@@ -242,7 +242,7 @@ class Visualiser:
             
             active_space = active_spaces[i]
             ax.plot(iterations, active_space, color='black',
-                   label=f'halfspace {i}', linestyle='-', marker='o', linewidth=1.5)
+                   label=f'halfspace {i}', linestyle='-', marker='o', linewidth=1.5, markersize=4)
             ax.set_ylim(-0.1, 1.1)
             ax.set_yticks([0, 1])
             ax.set_yticklabels(['inactive', 'active'])
@@ -251,7 +251,7 @@ class Visualiser:
             if i < num_of_spaces - 1:
                 ax.set_xticklabels([])
             else:
-                ax.set_xlabel('Iteration')
+                ax.set_xlabel('iteration')
 
             if i == 0:
                 ax.set_title('halfspace activity')
@@ -289,7 +289,7 @@ class Visualiser:
                                color='green', marker='o', label='original point', zorder=5)
 
         self.ax_main.scatter(self.result.projection[0], self.result.projection[1],
-                           color='green', marker='*', s=100, label='projection', zorder=5)
+                           color='#8B0000', marker='*', s=100, label='projection', zorder=5)
 
         if plot_optimal_point is not None:
             self.ax_main.scatter(plot_optimal_point[0], plot_optimal_point[1],
