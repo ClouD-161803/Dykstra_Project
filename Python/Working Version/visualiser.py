@@ -276,11 +276,11 @@ class Visualiser:
                                color='green', marker='o', label='Original Point')
 
         self.ax_main.scatter(self.result.projection[0], self.result.projection[1],
-                           color='green', marker='x', label='Projection')
+                           color='green', marker='*', s=100, label='Projection')
 
         if plot_optimal_point is not None:
             self.ax_main.scatter(plot_optimal_point[0], plot_optimal_point[1],
-                               color='red', marker='x', label='Optimal Solution')
+                               color='red', marker='*', s=50, label='Optimal Solution')
 
         self.ax_main.legend()
 
