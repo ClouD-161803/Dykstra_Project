@@ -95,10 +95,10 @@ class Visualiser:
 
         if N[0, 1] == 0:
             ax.axvline(x=c[0] / N[0, 0], linestyle='-', linewidth=2,
-                        label='Vertical Line', color=colour)
+                        label='vertical line', color=colour)
         elif N[0, 0] == 0:
             ax.axhline(y=c[0] / N[0, 1], linestyle='-', linewidth=2,
-                        label='Horizontal Line', color=colour)
+                        label='horizontal line', color=colour)
         else:
             x_line = np.linspace(self.x_range[0], self.x_range[1], 100)
             y_line = (c[0] - N[0, 0] * x_line) / N[0, 1]
@@ -167,7 +167,7 @@ class Visualiser:
         # Plot the path
         ax.plot(x_coords, y_coords, marker='.', linestyle='--',
                 color='blue', linewidth=0.5, markersize=1,
-                label='Projection Path')
+                label='projection path')
 
         # Plot the errors (quivers) - only where errors were tracked
         if errors_for_plotting is not None and errors_for_plotting.ndim == 3:
@@ -204,14 +204,14 @@ class Visualiser:
         iterations = np.arange(0, self.max_iter, 1)
         
         ax.plot(iterations, squared_errors, color='red',
-                label='Errors', linestyle='-', marker='o')
+                label='errors', linestyle='-', marker='o')
         ax.plot(iterations, stalled_errors, color='#D5B60A',
-                label='Stalling', linestyle='-', marker='o')
+                label='stalling', linestyle='-', marker='o')
         ax.plot(iterations, converged_errors, color='green',
-                label='Converged\n(error under 1e-3)', linestyle='-', marker='o')
+                label='converged\n(error under 1e-3)', linestyle='-', marker='o')
         ax.scatter(iterations[-1], squared_errors[-1],
                    color='#8B0000', marker='o',
-                   label=f'Final error is {format(squared_errors[-1], ".2e")}')
+                   label=f'final error is {format(squared_errors[-1], ".2e")}')
 
         ax.set_xlabel('Number of Iterations')
         ax.set_ylabel('Squared Errors')
@@ -242,7 +242,7 @@ class Visualiser:
             
             active_space = active_spaces[i]
             ax.plot(iterations, active_space, color='black',
-                   label=f'Halfspace {i}', linestyle='-', marker='o')
+                   label=f'halfspace {i}', linestyle='-', marker='o')
             ax.set_ylim(0, 1)
 
             if i == 0:
@@ -276,14 +276,14 @@ class Visualiser:
 
         if plot_original_point is not None:
             self.ax_main.scatter(plot_original_point[0], plot_original_point[1],
-                               color='green', marker='o', label='Original Point')
+                               color='green', marker='o', label='original point', zorder=5)
 
         self.ax_main.scatter(self.result.projection[0], self.result.projection[1],
-                           color='green', marker='*', s=100, label='Projection')
+                           color='green', marker='*', s=100, label='projection', zorder=5)
 
         if plot_optimal_point is not None:
             self.ax_main.scatter(plot_optimal_point[0], plot_optimal_point[1],
-                               color='red', marker='*', s=50, label='Optimal Solution')
+                               color='red', marker='*', s=50, label='optimal solution', zorder=5)
 
         self.ax_main.legend()
 

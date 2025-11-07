@@ -155,9 +155,9 @@ def run_with_tracking() -> None:
 
     # Prepare visualisation data
     Nc_pairs = [
-        (f"'Box'\n(rounded by {corner_count} corner(s))" if corner_count > 1 else "Box", 
+        (f"'box'\n(rounded by {corner_count} corner(s))" if corner_count > 1 else "box", 
          "Greys", N_box, c_box),
-        ("Line", "Greys", N_line, c_line)
+        ("line", "Greys", N_line, c_line)
     ]
 
     # Visualize results
