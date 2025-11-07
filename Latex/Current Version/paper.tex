@@ -1,62 +1,45 @@
-\documentclass[hidelinks]{article}
+\documentclass[onecolumn,doublespacing]{autart}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% START CUSTOM INCLUDES & DEFINITIONS
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage{amsmath,amssymb,amsfonts,amsthm}
-%\usepackage{parskip} %noident everywhere
-\usepackage{mathtools}
-\usepackage{subcaption}
-\usepackage{overpic}
-\usepackage{mymath}
-\usepackage{nth}
-\usepackage{caption}
-\usepackage{todonotes}
-\usepackage{fullpage}
-\usepackage{arydshln} % dashed line in array
-\usepackage{MnSymbol} % anti-diag dots
-%\usepackage{showlabels} % show equation and figure labels
-\usepackage{subcaption}
-\usepackage{varwidth, tikz}
-\usetikzlibrary{shapes, arrows, shapes.misc, arrows.meta, positioning, matrix, calc, fit, fadings, patterns}
-\usetikzlibrary{calc,patterns,decorations.pathmorphing,decorations.markings,arrows, arrows.meta}
-\usepackage[export]{adjustbox}
-\usepackage{placeins}
-%\setlength{\parindent}{0pt} 
-\usepackage{tabto}
-
-\newtheorem{lemma}{Lemma}
-\newtheorem{definition}{Definition}
-\newtheorem{theorem}{Theorem}
-\newtheorem{corollary}{Corollary}
-\newtheorem{proposition}{Proposition}
-\newtheorem{assumption}{Assumption}
-\newtheorem{remark}{Remark}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% ALG STUFF
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage{algorithm}
-\usepackage{algorithmic}
-\newcommand{\algorithmicbreak}{\textbf{break}}
-\newcommand{\Break}{\State \algorithmicbreak}
-\renewcommand{\algorithmicrequire}{\textbf{Input:}}
-\renewcommand{\algorithmicensure}{\textbf{Output:}}
-\makeatletter
-\newcommand{\algrule}[1][.2pt]{{\color{black!10!white}{\par\vskip.1\baselineskip\hrule height #1\par\vskip.1\baselineskip}}}
-\makeatother
-%\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% END CUSTOM INCLUDES & DEFINITIONS
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{Latex/Current Version/Packages/packages}
 
 \pdfobjcompresslevel=0
 
-\title{Dykstra's Alternating Projection for Polyhedral Sets}
-\author{Claudio Vestini and Idris Kempf}
-\begin{document}
-\maketitle
+% Remove preprint footer
+\makeatletter
+\def\ps@copyright{\let\@mkboth\@gobbletwo
+  \def\@oddhead{}
+  \let\@evenhead\@oddhead
+  \def\@oddfoot{\hfil\thepage\hfil}
+  \let\@evenfoot\@oddfoot}
+\makeatother
 
-\section{Introduction}
+\usepackage{mymath}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{Stalling Fast Forwarding for Dykstra's Algorithm}
+
+\author[Oxford]{Claudio Vestini}\ead{claudio.vestini@keble.ox.ac.uk}
+\author[Oxford]{Idris Kempf}\ead{idris.kempf@eng.ox.ac.uk}
+\address[Oxford]{Department of Engineering Science, University of Oxford}
+
+\begin{abstract}
+abstract here
+\end{abstract}
+
+\end{frontmatter}
+
+\input{Latex/Current Version/Sections/1-Introduction}
+\input{Latex/Current Version/Sections/2-Dykstra's Method: A Review}
+%\input{Latex/Current Version/Sections/3-The Polyhedral Case}
+%\input{Latex/Current Version/Sections/4-Fast Forwarding Stalling Period}
+\input{Latex/Current Version/Sections/4-Main Results}
+\input{Latex/Current Version/Sections/5-Conclusion}
+
+\newpage
+\bibliographystyle{plain}
+\bibliography{master_bib_abbrev}
 
 \end{document}

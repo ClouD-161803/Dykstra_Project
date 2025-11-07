@@ -1,0 +1,152 @@
+
+\section{Background}
+
+\subsection{Euclidean Projections} \label{subsec:euclidean_projections}
+
+In this paper, we restrict ourselves to the specific case of $X = \Rset^p$ and the norm $\twonorm{x}\eqdef (x_1^2+\dots+x_p^2)^{1/2}$. The Euclidean projection of $x^\circ\in\Rset^p$ onto a closed convex set $\mathcal{H}\subset \Rset^p$ is defined as the point $x^\star\coloneqq \mathcal{P}_{\mathcal{H}}(x)$ that minimises the Euclidean distance between $x^\circ$ and any point in $\mathcal{H}$. Here, it is assumed that $\mathcal{H}$ is represented as the intersection of $n$ closed convex sets $\mathcal{H}_i\subset \Rset^p$,
+\begin{align}\label{eq:intersection}
+\mathcal{H}=\bigcap_{i=0}^{n-1}\mathcal{H}_i,
+\end{align}
+so that $\mathcal{P}_{\mathcal{H}}(x)$ can be written as
+\begin{align}\label{eq:projection}
+\mathcal{P}_{\mathcal{H}}(x^\circ)\coloneqq \argmin_{x\in \bigcap_{i=0}^{n-1}\mathcal{H}_i}\frac{1}{2}\twonorm{x-x^\circ}^2.
+\end{align}
+By the convexity of the set $\mathcal{H}$, problem~\eqref{eq:projection} admits a unique solution~\cite[Ch.\ 3.2]{BAUSCHKEBOOK}. Here, we further assume that $\mathcal{H}$ is a polyhedral set, $\mathcal{H}\eqdef\set{x\in\Rset^p}{A x \leq c}$, and each $\mathcal{H}_i$ a half-space,
+\begin{align}\label{eq:sets_i}
+\mathcal{H}_i\coloneqq\set{x\in\Rset^p}{\trans{f_i}x \leq c_i},
+\end{align}
+where $i=1,\dots,n$ and $f_i$, $\twonorm{f_i}=1$, is the normal vector of the plane $H_i\coloneqq\set{x\in\Rset^p}{\trans{f_i}x = c_i}$. While for some sets the solution of~\eqref{eq:projection} can be obtained explicitly and in closed form, e.g., when $\mathcal{H}$ is an $n$-dimensional cube, no closed-form solution is known for arbitrary polyhedral sets. In these cases, the solution can be obtained using a solver for CQPs. To solve~\eqref{eq:projection}, most solvers require introducing an additional variable $z\coloneqq Ax$ that is projected onto the set $\set{z\in\Rset^n}{z \leq c}$, for which an explicit solution exists. However, for large $n$, this variable augmentation can reduce the computational efficiency, in particular when the projection is part of a larger iterative algorithm.
+
+%\section{Dykstra's Method: A Review}\label{sec:dykstra}
+
+%This section introduces the MAP and Dykstra's method, which provide approximate solutions to~\eqref{eq:bap}.
+% \subsection{Euclidean Projections on Convex Sets}
+%  In this paper, we restrict ourselves to the specific case of $X = \Rset^n$ and a Euclidean choice of the induced norm $\| \cdot \|$. The latter is also known as the $\mathcal{L}_2$ norm, and, given a vector $x \in \Rset^n$, is defined as:
+% \begin{equation}
+%     \| x \|_2 \coloneqq \sqrt{\sum_{i =1}^{n} x_i^2} = \mathcal{L}_2\left[x\right]
+%     \label{eq:l2}
+% \end{equation}
+
+
+% The Euclidean projection of a point $x^\circ\in\Rset^n$ onto a closed convex set $\mathcal{H}\subset \Rset^p$ is defined as the point $x^\star\coloneqq \mathcal{P}_{\mathcal{H}}(x)$ that minimises the Euclidean distance, computed using~\eqref{eq:l2}, between $x^\circ$ and any point in $\mathcal{H}$:
+% \begin{align}\label{eq:projection}
+% \mathcal{P}_{\mathcal{H}}(x^\circ)\coloneqq \argmin_{x\in\mathcal{H}}\frac{1}{2}\twonorm{x-x^\circ}^2.
+% \end{align}
+% By the convexity of the set $\mathcal{H}$, problem~\eqref{eq:projection} admits a unique solution~\cite[Ch.\ 3.2]{BAUSCHKEBOOK}. Here, we assume that $\mathcal{H}$ is a convex polyhedral set that can be represented as:
+% \begin{align}\label{eq:polyhedron}
+% \mathcal{H}\coloneqq\set{x\in\Rset^p}{A x \leq c},
+% \end{align}
+% where $\inR{A}{n}{p}$ and $c\in\Rset^n$. Each row of $\mathcal{H}$ corresponds to a half-space $\mathcal{H}_i$,
+% \begin{align}\label{eq:sets_i}
+% \mathcal{H}_i\coloneqq\set{x\in\Rset^p}{\trans{f_i}x \leq c_i},
+% \end{align}
+% where $i=1,\dots,n$ and $f_i$, $\twonorm{f_i}=1$, is the normal vector of the plane $H_i\coloneqq\set{x\in\Rset^p}{\trans{f_i}x = c_i}$. The polyhedral set~\eqref{eq:polyhedron} can also be represented as the intersection of the half-spaces $\mathcal{H}_i$, i.e.\ $\mathcal{H}=\bigcap_{i=0}^{n-1}\mathcal{H}_i$. In many engineering applications, constraint sets can be approximated using~\eqref{eq:polyhedron}.
+
+% While for some sets the solution of~\eqref{eq:projection} can be obtained explicitly and in closed form, e.g., when $\mathcal{H}$ is an $n$-dimensional cube, no closed-form solution is known for arbitrary polyhedral sets. In these cases, the solution can be obtained using a solver for CQPs. To solve~\eqref{eq:projection}, most solvers require introducing an additional variable $z\coloneqq Ax$ that is projected onto the set $\set{z\in\Rset^n}{z \leq c}$, for which an explicit solution exists. However, for large $n$, this variable augmentation can reduce the computational efficiency, in particular when the projection is part of a larger iterative algorithm.
+
+\subsection{The Method of Alternating Projections}
+
+The method of alternating projections (MAP) is an iterative method to find an $x^\star\in\Rset^p$ satisfying $x\in\bigcap_{i=0}^{n-1}\mathcal{H}_i$ by cyclically projecting onto the convex sets $\mathcal{H}_i$~\cite{NEUMANN,BREGMAN1965}. Starting from an arbitrary point $x_m=x^\circ$, MAP generates a sequence $\{x_m\}$ by computing
+\begin{align}\label{eq:map}
+    x_{m+1} = (P_{\mathcal{H}_{n-1}} \circ \dots \circ P_{\mathcal{H}_0}) (x_m).
+\end{align}
+When each $\mathcal{H}_i$ is an affine subspace, it can be shown that MAP also solves~\eqref{eq:projection}. For general closed convex sets, however, the sequence generated by~\eqref{eq:map} is only guaranteed to converge to a point within the intersection $\mathcal{H}$~\cite{BREGMAN1965}. This limit point is generally not the unique solution to~\eqref{eq:projection}.
+
+
+% \subsection{The Method of Alternating Projections}
+
+% The most direct iterative strategy for solving~\eqref{eq:projection} is the MAP, also widely known in signal processing literature as the Projections onto Convex Sets (POCS) method. First studied in its modern form by von Neumann for two closed subspaces~\cite{NEUMANN}, the method generates a sequence of iterates, $\{x_m\}$, by cyclically projecting the current point onto each of the $n$ constraint sets. Given $n$ convex sets $\mathcal{H}_0,\dots,\mathcal{H}_{n-1}$, the iterative scheme is defined as:
+% \begin{equation}
+%     x_{m+1} = (P_{\mathcal{H}_{n-1}} \circ \dots \circ P_{\mathcal{H}_0}) (x_m).
+% \end{equation}
+% The convergence properties of MAP are highly dependent on the geometry of the constraint sets $\{\mathcal{H}_i\}$. When each set is an affine subspace, the algorithm exhibits strong convergence. For this class of sets, von Neumann proved that the sequence $\{x_m\}$ converges in norm to the true best approximation, $x^* = P_{\mathcal{H}}(x^\circ)$~\cite{NEUMANN}.
+
+% For general closed convex sets, however, the guarantees are significantly weaker. As established by Bregman, the sequence generated by MAP is only guaranteed to converge weakly to a point within the intersection $\mathcal{H}$~\cite{BREGMAN1965}. This limit point is generally not the unique solution to the BAP. This limitation is fundamental to the method's structure; the simple iterative update discards the residual information from each projection step. The displacement vector resulting from the projection onto one set is not utilised in the subsequent projection onto the next. Consequently, while the iterates are drawn closer to the intersection, they are not steered towards the specific BAP solution, $P_{\mathcal{H}}(x^\circ)$. This well-documented shortcoming of MAP necessitates more advanced methods to solve the general BAP.
+% % As an alternative to variable augmentation, problem~\eqref{eq:projection} can be solved using \emph{Dykstra's Alternating Projection Algorithm}~\cite{DYKSTRA}. Dykstra's algorithm, first published in 1983, extends von Neumann's \emph{Method of Alternating Projections} (MAP)~\cite{NEUMANN}, which is designed to find a point lying in the intersection of $n$ closed convex sets by cyclically projecting onto each individual set. While von Neumann's algorithm identifies \emph{some} point in the intersection, Dykstra's algorithm determines the Euclidean projection~\eqref{eq:projection}. Both algorithms circumvent the potentially complex projection $\mathcal{P}_\mathcal{H}$ by iteratively applying the (known) projections $\mathcal{P}_{\mathcal{H}_0},\dots,\mathcal{P}_{\mathcal{H}_{n-1}}$. 
+
+\subsection{Dykstra's Alternating Projection Method}
+
+Dykstra's method extends~\eqref{eq:map} to generate a sequence of iterates that converges to the solution of~\eqref{eq:projection}. Given $n$ convex sets $\mathcal{H}_0,\dots,\mathcal{H}_{n-1}$, Dykstra's alternating projection algorithm finds the orthogonal projection $x^\star$ of $x^\circ$ onto $\mathcal{H}\eqdef{\bigcap}_{i=0}^{n-1} \mathcal{H}_i$ by generating a series of iterates \{$x_{m}$\} using the scheme:
+\begin{subequations}\label{eq:dykstra}
+\begin{align}
+x_{m+1}&=\mathcal{P}_{[m]}\left(x_{m}+e_{m-n}\right),\label{eq:dykstra:proj}\\
+e_m&=e_{m-n}+x_{m}-x_{m+1}\label{eq:dykstra:error},
+\end{align}
+\end{subequations}
+where $[m]\eqdef m \, \text{mod} \, n$, $x_0=x$, $\mathcal{P}_{[m]}\eqdef\mathcal{P}_{\mathcal{H}_{[m]}}$, and the auxiliary variables $e_m$ are initialised as
+\begin{align}\label{eq:initial error}
+&e_{-n} = e_{-(n-1)} = ... = e_{-1} = 0.
+\end{align}
+The Boyle-Dykstra theorem~\cite{DYKSTRA} implies that $\lim_{m\rightarrow\infty}\anynorm{x_m-\mathcal{P}_\mathcal{H}(x^\circ)}=0$~\cite{DYKSTRA,DYKSTRAPERKINS}. For a finite number of iterations, there is no guarantee that $x_m\in\mathcal{H}$ nor that $x_m\neq x^\circ$. Note that~\eqref{eq:map} can be obtained from~\eqref{eq:dykstra} by setting $e_m=0\,\,\forall m$ in~\eqref{eq:dykstra:error}. 
+
+\subsection{Connection to Fenchel Dual and ADMM} \label{subsec:admm_connection}
+
+It was established that Dykstra's algorithm is equivalent to a block coordinate descent method applied to the Fenchel dual of the BAP~\cite{HAN1988,GAFFKE1989}. This duality arises from reformulating~\eqref{eq:bap} using the sum of the indicator functions $\delta_{\mathcal{H}_i}(x)$ for each constraint set:
+\begin{equation}
+    \underset{x \in \mathbb{R}^p}{\text{minimise:}} \quad  \frac{1}{2}\|x - x^\circ\|^2 + \sum_{i=0}^{n-1} \delta_{\mathcal{H}_i}(x) .
+\end{equation}
+The sequence of iterates generated by Dykstra's algorithm on this primal problem was shown to correspond to the sequence generated by a cyclic block coordinate descent algorithm on its Fenchel dual.
+This equivalence reveals that the auxiliary increment sequences $\{e_m\}$ in the primal formulation are precisely the dual variables of the optimisation problem. Consequently, the update rule~\eqref{eq:dykstra:error} can be interpreted as the execution of a coordinate-wise update step in the dual space. The dual perspective is crucial because it enables the transfer of analytical results between the two domains. For example, known convergence rates for Dykstra's algorithm when applied to polyhedral sets can be used to establish linear convergence for coordinate descent on dual problems, such as the LASSO in machine learning.
+
+The connection to duality also situates Dykstra's algorithm within the broader family of operator splitting methods in close relationship with the Alternating Direction Method of Multipliers (ADMM). ADMM has become a powerful and widely used tool for large-scale optimisation, particularly in statistics and machine learning~\cite{BOYDADMM}. The algorithm decomposes the problem via an augmented Lagrangian, adding to the standard Lagrangian a quadratic penalty on constraint violations. The algorithm then proceeds by performing alternating minimisation steps with respect to the primal variables, followed by an update of the dual variables. This structure differs from the purely dual ascent nature of Dykstra's algorithm.
+For the specific case of the BAP with two constraint sets ($\mathcal{H}_0, \mathcal{H}_1$), it has been shown that if one of the sets is a linear subspace, then applying ADMM to the dual problem generates iterates that are equivalent to those produced by Dykstra's algorithm on the primal problem~\cite{GABAY1983}. In more general cases, however, the algorithms are distinct. Dykstra's method performs a cyclic, coordinate-wise update in the dual space, whereas ADMM's updates are typically not coordinate-wise and its convergence behaviour is sensitive to the choice of the penalty parameter.
+
+% \subsection{Connection to Fenchel Dual and ADMM}
+
+% It was established independently by Han~\cite{HAN1988} and Gaffke and Mathar~\cite{GAFFKE1989} that Dykstra's algorithm is mathematically equivalent to a block coordinate descent method applied to the Fenchel dual of the BAP. This duality arises from reformulating~\eqref{eq:bap} using the sum of the indicator functions $\delta_{\mathcal{H}_i}(x)$ for each constraint set:
+% \begin{equation}
+%     \underset{x \in \mathbb{R}^p}{\text{minimise:}} \quad \left\{ \frac{1}{2}\|x - x^\circ\|^2 + \sum_{i=0}^{n-1} \delta_{\mathcal{H}_i}(x) \right\}.
+% \end{equation}
+% The sequence of iterates generated by Dykstra's algorithm on this primal problem was shown to correspond to the sequence generated by a cyclic block coordinate descent algorithm on its Fenchel dual.
+% This equivalence reveals that the auxiliary increment sequences $\{e_m\}$ in the primal formulation are precisely the dual variables of the optimisation problem. Consequently, the update rule~\eqref{eq:dykstra:error} can be interpreted as the execution of a coordinate-wise update step in the dual space. The dual perspective is crucial because it enables the transfer of analytical results between the two domains. For example, known convergence rates for Dykstra's algorithm when applied to polyhedral sets can be used to establish linear convergence for coordinate descent on dual problems, such as the LASSO in machine learning.
+
+% The connection to duality also situates Dykstra's algorithm within the broader family of operator splitting methods in close relationship with the Alternating Direction Method of Multipliers (ADMM). ADMM has become a powerful and widely used tool for large-scale optimisation, particularly in statistics and machine learning~\cite{BOYDADMM}. The algorithm decomposes the problem via an augmented Lagrangian, adding to the standard Lagrangian a quadratic penalty on constraint violations. The algorithm then proceeds by performing alternating minimisation steps with respect to the primal variables, followed by an update of the dual variables. This structure differs from the purely dual ascent nature of Dykstra's algorithm.
+% For the specific case of the BAP with two constraint sets ($\mathcal{H}_0, \mathcal{H}_1$), it has been shown that if one of the sets is a linear subspace, then applying ADMM to the dual problem generates iterates that are equivalent to those produced by Dykstra's algorithm on the primal problem~\cite{GABAY1983}. In more general cases, however, the algorithms are distinct. Dykstra's method performs a cyclic, coordinate-wise update in the dual space, whereas ADMM's updates are typically not coordinate-wise and its convergence behaviour is sensitive to the choice of the penalty parameter.
+
+\subsection{The Polyhedral Case}\label{sec:polyhedral_case}
+
+For polyhedral sets~\eqref{eq:sets_i}, the projection step~\eqref{eq:dykstra:proj} of Dykstra's method can be simplified to
+\begin{align}\label{eq:dykstra:proj:poly}
+x_{m+1}=
+\begin{cases}
+x_{m}+e_{m-n} & \text{if } x_{m}+e_{m-n}\in\mathcal{H}_{[m]}\\
+x_{m} - \left(x_{m}^T f_{[m]} - c_{[m]}\right) f_{[m]} & \text{if } x_{m}+e_{m-n}\not\in\mathcal{H}_{[m]}
+\end{cases},
+\end{align}
+% \begin{align}\label{eq:dykstra:proj:poly}
+% x_{m+1}=
+% \begin{cases}
+% x_{m}+e_{m-n} & \text{if } x_{m}+e_{m-n}\in\mathcal{H}_{[m]}\\
+% x_{m}+e_{m-n} - \left((x_{m}+e_{m-n})^T f_{[m]} - c_{[m]}\right) f_{[m]} & \text{if } x_{m}+e_{m-n}\not\in\mathcal{H}_{[m]}
+% \end{cases},
+% \end{align}
+and the update for the auxiliary vector~\eqref{eq:dykstra:error} to
+\begin{align}\label{eq:dykstra:error:poly}
+e_m=
+\begin{cases}
+0 & \text{if } x_{m}+e_{m-n}\in\mathcal{H}_{[m]}\\
+e_{m-n}+\left(x_{m}^T f_{[m]} - c_{[m]}\right) f_{[m]} & \text{if } x_{m}+e_{m-n}\not\in\mathcal{H}_{[m]}
+\end{cases}.
+\end{align}
+% \begin{align}\label{eq:dykstra:error:poly}
+% e_m=
+% \begin{cases}
+% 0 & \text{if } x_{m}+e_{m-n}\in\mathcal{H}_{[m]}\\
+% \left((x_{m}+e_{m-n})^T f_{[m]} - c_{[m]}\right) f_{[m]} & \text{if } x_{m}+e_{m-n}\not\in\mathcal{H}_{[m]}
+% \end{cases}.
+% \end{align}
+The auxiliary vector $e_m$ is either zero or parallel to $f_{[m]}$, so that it can be represented as $e_m = k_m f_{[m]}$ with 
+\begin{align}\label{eq:km}
+k_m = 
+\begin{cases}
+0 & \text{if } x_{m}+k_{m-n}f_{[m]}\in\mathcal{H}_{[m]}\\
+k_{m-n} + x_m^T f_{[m]} - c_{[m]} & \text{if } x_{m}+k_{m-n}f_{[m]}\not\in\mathcal{H}_{[m]}
+\end{cases}.
+\end{align}
+
+The convergence of Dykstra's iterates to the Eucledian projection has been analysed in~\cite{DYKSTRAPOLY,DYKSTRAPOLY2,DYKSTRAPERKINS} for polyhedral sets. The  convergence proof in~\cite{DYKSTRAPOLY} is based on partitioning the sets into inactive ($x^\star\in \text{int}\,\mathcal{H}_i$) and active sets ($x^\star\in H_i$), i.e. 
+\begin{align}
+&A=\set{i\in\lbrace 0,\dots,n-1\rbrace}{x_\infty\in H_i},
+&B=\lbrace 0,\dots,n-1\rbrace\backslash A=\set{i\in\lbrace 0,\dots,n-1\rbrace}{x_\infty\in \text{int}\,\mathcal{H}_i},
+\end{align}
+where $x_\infty=\lim_{m\rightarrow\infty}x_m$. It can be shown~\cite[Lemma~3.1]{DYKSTRAPOLY} that there exists a number $N_1$ such that whenever $[m]\in B$ at iteration $m\geq N_1$, it follows that $x_m=x_{m-1}$ and $e_m=0$, i.e. the half-spaces that become ``inactive'' remain inactive. Furthermore, there exists $N_2\geq N_1$ such that whenever $n\geq N_2$, it holds that $\twonorm{x_{m+n}-x_\infty}\leq\alpha_{[m]}\twonorm{x_m-x_\infty}$, where $0\leq\alpha_{[m]}<1$ are numbers related to angles between half-spaces~\cite[Lemma~3.7]{DYKSTRAPOLY}. The number $N_2$ describes the iteration from which on the algorithm has determined the inactive half-spaces. It then follows that there exist constants $0\leq c < 1$ and $\rho > 0$ such that $\anynorm{x_m -x_\infty} \leq \rho c^m$~\cite[Thm.~3.8]{DYKSTRAPOLY}. The constant $c$ can be estimated from the smallest $\alpha_{[m]}$, which is characterized by the angle between certain subspaces (subspaces formed by active half-spaces). The constant $\rho$, however, depends on an unknown $N_3\geq N_2$ and on $x^\circ$, and can therefore not be computed in advance~\cite{DYKSTRAPERKINS,XUPOLY}. % In the case of stalling, the variable $\rho$ can become arbitrarily large, making the application of Dykstra's method difficult in practice. The authors of~\cite{DYKSTRAPERKINS} proposed a combined Dysktra-conjugate-gradient method that allows for computing an upper bound on $\anynorm{x_m -x_\infty}$. The authors of~\cite{XUPOLY} proposed an alternative algorithm called \emph{successive approximate algorithm}, which promises fast convergence, conditioned on knowing a point $x\in\mathcal{H}$ in advance.

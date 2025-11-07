@@ -1,6 +1,20 @@
 % This file was created with JabRef 2.10.
 % Encoding: UTF-8
-
+@article{KEMPF20206542,
+title = {Fast Gradient Method for Model Predictive Control with Input Rate and Amplitude Constraints⁎⁎This research is supported by the Engineering and Physical Sciences Research Council (EPSRC) with a Diamond CASE studentship.},
+journal = {IFAC-PapersOnLine},
+volume = {53},
+number = {2},
+pages = {6542-6547},
+year = {2020},
+note = {21st IFAC World Congress},
+issn = {2405-8963},
+doi = {https://doi.org/10.1016/j.ifacol.2020.12.070},
+url = {https://www.sciencedirect.com/science/article/pii/S2405896320303268},
+author = {Idris Kempf and Paul Goulart and Stephen Duncan},
+keywords = {Model Predictive Control (MPC), Fast Gradient Method, Dykstra’s Method, Alternating Direction of Multipliers Method (ADMM), Projection, Rate Constraints},
+abstract = {This paper is concerned with the computing efficiency of model predictive control (MPC) problems for dynamical systems with both rate and amplitude constraints on the inputs. Instead of augmenting the decision variables of the underlying finite-horizon optimal control problem to accommodate the input rate constraints, we propose to solve this problem using the fast gradient method, where the projection step is solved using Dykstra’s algorithm. We show that, relative to the Alternating Direction of Method Multipliers (ADMM), this approach greatly reduces the computation time while halving the memory usage. Our algorithm is implemented in C and its performance demonstrated using several examples.}
+}
 
 @TechReport{DIAMONDII,
   Title                    = {{Diamond-II}: Conceptual Design Report},
@@ -2360,7 +2374,7 @@ Diese Arbeit soll zeigen, wie die wichtigen Probleme der Theorie linearer System
   Timestamp                = {2024.09.09}
 }
 
-@Article{BREGMAN,
+@Article{BREGMAN1965,
   Title                    = {The method of projections for finding the common point of convex sets},
   Author                   = {Bregman, L.M.},
   Journal                  = {Sov. Math. Dokl.},
@@ -2386,3 +2400,36 @@ Diese Arbeit soll zeigen, wie die wichtigen Probleme der Theorie linearer System
 
 ON A CONVEX SET WITH NONDIFFERENTIABLE
 METRIC PROJECTION
+
+@article{GAFFKE1989,
+  author    = {Gaffke, N. and Mathar, R.},
+  title     = {A cyclic projection algorithm via duality},
+  journal   = {Metrika},
+  year      = {1989},
+  volume    = {36},
+  number    = {1},
+  pages     = {29--54},
+  doi       = {10.1007/BF02614083}
+}
+
+@article{BOYDADMM,
+  author    = {Boyd, Stephen and Parikh, Neal and Chu, Eric and Peleato, Borja and Eckstein, Jonathan},
+  title     = {Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers},
+  journal   = {Foundations and Trends® in Machine Learning},
+  year      = {2011},
+  volume    = {3},
+  number    = {1},
+  pages     = {1--122},
+  doi       = {10.1561/2200000016}
+}
+
+@incollection{GABAY1983,
+  author    = {Gabay, Daniel},
+  title     = {Applications of the method of multipliers to variational inequalities},
+  booktitle = {Augmented Lagrangian Methods: Applications to the Numerical Solution of Boundary-Value Problems},
+  editor    = {Fortin, M. and Glowinski, R.},
+  publisher = {North-Holland},
+  year      = {1983},
+  chapter   = {9},
+  pages     = {299--331}
+}
