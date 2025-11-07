@@ -136,6 +136,9 @@ def run_with_tracking() -> None:
         delete_spaces=delete_half_spaces
     )
     
+
+    solver_name = solver.__class__.__name__
+    
     # --- Run Solver ---
     
     result = solver.solve()
@@ -158,7 +161,7 @@ def run_with_tracking() -> None:
     ]
 
     # Visualize results
-    visualiser = Visualiser(result, Nc_pairs, max_iter, x_range, y_range)
+    visualiser = Visualiser(result, Nc_pairs, max_iter, x_range, y_range, solver_name)
     visualiser.visualise(plot_original_point=z, plot_optimal_point=actual_projection)
 
 

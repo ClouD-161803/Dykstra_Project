@@ -29,7 +29,8 @@ class Visualiser:
     """
     
     def __init__(self, result: ProjectionResult, nc_pairs: list, 
-                 max_iter: int, x_range: list[float], y_range: list[float]) -> None:
+                 max_iter: int, x_range: list[float], y_range: list[float],
+                 solver_name: str = "Dykstra's Algorithm") -> None:
         """
         Initialise the visualiser.
         
@@ -39,12 +40,14 @@ class Visualiser:
             max_iter: Number of iterations.
             x_range: [min_x, max_x] for plotting domain.
             y_range: [min_y, max_y] for plotting domain.
+            solver_name: Name of the solver used.
         """
         self.result = result
         self.nc_pairs = nc_pairs
         self.max_iter = max_iter
         self.x_range = x_range
         self.y_range = y_range
+        self.solver_name = solver_name
         self.fig: Figure | None = None
         self.ax_main: Axes | None = None
         self.ax_error: Axes | None = None
@@ -126,7 +129,7 @@ class Visualiser:
             ax.set_aspect('equal')
             ax.set_xlabel('X')
             ax.set_ylabel('Y')
-            ax.set_title(f"Dykstra's algorithm executed for {self.max_iter} iterations")
+            ax.set_title(f"{self.solver_name} executed for {self.max_iter} iterations")
             ax.grid(True)
             ax.legend()
 
