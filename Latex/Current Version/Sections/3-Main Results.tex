@@ -1,13 +1,11 @@
-\section{Main Result}
+\section{Fast-Forwarding Dykstra's Algorithm}
 \label{sec:main_result}
 
-In~\cite{DYKSTRASTALLING}, the behaviour of Dykstra's method is analysed for two polyhedral sets. The authors give conditions on Dykstra's algorithm for (i) finite convergence, (ii) infinite convergence, and (iii) stalling followed by infinite convergence. The stalling period is formalised for $n$ sets below.
+In this section, we propose a modification to Dykstra's algorithm to resolve the stalling problem in the general case. This represents the main contribution of this paper.
 
-\begin{defn}[Stalling]\label{def:stalling}
-Given $m\geq n-1$, a stalling period is defined as those $i\in\lbrace 0,\dots,N_{stall}\rbrace$ with $N_{stall}\geq n$ for which $x_{m+i}=x_{m+i-n}$.
-\end{defn}
+\subsection{Stalling Fast-Forwarding} \label{subsec:stalling_fastforward}
 
-During stalling, only the auxiliary variables $e_{m+i}$ change, which are modified by constant increments $x_m-x_{m+1}$. The stalling period therefore continues until $e_{m+i}$ becomes such that $x_{m+i}+e_{m-n+i}\in\mathcal{H}_{[m+i]}$. For polyhedral sets, the length of the stalling period can be pre-computed.
+We first establish the length of the staling period as $N_{stall}$. This length can be computed as soon as the algorithm encounters stalling, using the half-spaces that are active at this iteration. The stalling period continues until one of these half-spaces becomes inactive, at which point stalling terminates. This is formalised in Theorem~\ref{thm:nstall}.
 
 \begin{thm}[Length of Stalling Period]\label{thm:nstall}
 Suppose that stalling starts at iteration $m$ as in Def.~\ref{def:stalling} and denote the active half-spaces by $\mathcal{A}\coloneqq\set{i\in\lbrace 0,\dots,n-1\rbrace}{x_{m+i}+e_{m-n+i}\not\in\mathcal{H}_{[m+i]}}$. Then, the length of the stalling period is given by
@@ -25,21 +23,61 @@ k_{m-n+i}+n N_i\left(x_{m+i}^T f_{[m+i]} - c_{[m+i]}\right) < 0,\qquad i\in\math
 so that $N_i=\left\lceil k_{m-n+i} / \left(n(c_{[m+i]}-x_{m+i}^T f_{[m+i]})\right)\right\rceil$. If $i_1<\dots<i_j$ are such that $N_{i_1}=\dots = N_{i_j}$, then according to~\eqref{eq:dykstra}, half-space $i_1$ is discarded first (and thus the minimiser of~\eqref{eq:nstall}).\qed
 \end{pf}
 
-Following the end of the stalling period, one half-space is discarded from the active half-space and $\mathcal{A}$ redefined, upon which the algorithm may again encounter a stalling condition. By Theorem~\eqref{thm:nstall}, the stalling period can be fast-forwarded by applying constant increments to $k_{m+i}$ for $i=0,\dots,N_{stall}$. This is illustrated for the line-box example in Figure~\ref{fig:stalling2}, which replicates the stalling situation from~\cite{DYKSTRASTALLING} and the fast-forwarding is applied in Figure~\ref{fig:fastforwarding}. The first column illustrates the trajectories of the iterates and their distance to the Eucledian projection computed using an interior point method. The second column shows the half-space activity, where half-space 0 corresponds to the left side of the box, half-space 1 to the top side of the box, and half-space 2 to the line (down-facing normal). In Figure~\ref{fig:stalling2}, the algorithm stalls until iteration 16. From the second column, it can be seen that the algorithm stalls until half-space 0 becomes inactive. 
+Following the end of the stalling period, one half-space is discarded from the active half-space and $\mathcal{A}$ redefined, upon which the algorithm may again encounter a stalling condition. By Theorem~\eqref{thm:nstall}, the stalling period can be fast-forwarded by applying constant increments to $k_{m+i}$ for $i=0,\dots,N_{stall}$.
+
+\subsection{Stall-Averse Dykstra} \label{subsec:algo}
+
+% \begin{algorithm}[h!]
+% \caption{Dykstra's Algorithm with Stall Fast-Forwarding}
+% \label{alg:fastforward}
+% \begin{algorithmic}[1]
+% \REQUIRE Initial point $x^\circ$, half-spaces $\{f_i, c_i\}_{i=0}^{n-1}$, max iterations $N_{\max}$, stall tolerance $\epsilon_{\text{stall}}$
+% \STATE \textbf{Initialise:} $x \leftarrow x^\circ$, $e_j \leftarrow \vec{0}$ for $j=0 \dots n-1$
+% \STATE $X_{\text{hist}} \leftarrow [x]$
+% \STATE $m \leftarrow 0$
+% \WHILE{$m < N_{\max}$}
+%     \STATE $i \leftarrow m \pmod n$
+%     \STATE $x_{\text{target}} \leftarrow x + e_i$
+%     \STATE $x_{\text{new}} \leftarrow \mathcal{P}_{\mathcal{H}_i}(x_{\text{target}})$ \COMMENT{Project using~\eqref{eq:dykstra:proj:poly}}
+%     \STATE $e_i \leftarrow x_{\text{target}} - x_{\text{new}}$ \COMMENT{Update auxiliary vector}
+%     \STATE $x \leftarrow x_{\text{new}}$
+%     \STATE $X_{\text{hist}}.append(x)$
+%     \STATE $m \leftarrow m + 1$
+%     \IF{$m \ge n$ \AND $\twonorm{x - X_{\text{hist}}[m-n]} < \epsilon_{\text{stall}}$}
+%         \STATE \COMMENT{Stalling detected}
+%         \STATE $N_{stall} \leftarrow \text{ComputeStallLength}(m, \{e_j\}, \{f_j\}, \{c_j\}, n)$ \COMMENT{Using Thm.~\ref{thm:nstall}}
+%         \STATE $N_{\text{cycles}} \leftarrow \lceil N_{stall} / n \rceil$
+%         \FOR{$j \in \{0, \dots, n-1\}$}
+%             \STATE $k_j \leftarrow \trans{f_j} e_j$ \COMMENT{Get scalar from $e_j = k_j f_j$}
+%             \STATE $\Delta k_j \leftarrow \trans{f_j} x - c_j$ \COMMENT{$x$ is the constant stalling point}
+%             \STATE $k_j \leftarrow k_j + N_{\text{cycles}} \times \Delta k_j$
+%             \STATE $e_j \leftarrow k_j f_j$ \COMMENT{Update auxiliary vector}
+%         \ENDFOR
+%         \STATE $X_{\text{hist}}.extend([x] \times N_{stall})$ \COMMENT{Fill history}
+%         \STATE $m \leftarrow m + N_{stall}$ \COMMENT{Jump iteration counter}
+%     \ENDIF
+% \ENDWHILE
+% \ENSURE $x$
+% \end{algorithmic}
+% \end{algorithm}
+
+\subsection{Numerical Example} \label{subsec:example}
+
+This is illustrated for the line-box example in Figure~\ref{fig:stalling2}, which replicates the stalling situation from~\cite{DYKSTRASTALLING} and the fast-forwarding is applied in Figure~\ref{fig:fastforwarding}. The first column illustrates the trajectories of the iterates and their distance to the Eucledian projection computed using an interior point method. The second column shows the half-space activity, where half-space 0 corresponds to the left side of the box, half-space 1 to the top side of the box, and half-space 2 to the line (down-facing normal). In Figure~\ref{fig:stalling2}, the algorithm stalls until iteration 16. From the third plot, it can be seen that the algorithm stalls until half-space 0 becomes inactive. 
 
 In Figure~\ref{fig:fastforwarding}, stalling is detected at iteration 1, upon which the algorithm is fast-forwarded using $N_{stall}=15$ iterations, where $N_{stall}$ is computed using Theorem~\ref{thm:nstall}. At iteration 3, the iterates of the modified algorithm arrive where the iterates of the original algorithm arrive at iteration 16. The iterates of the modified algorithm then become identical to those of the original algorithm.
 
 \begin{figure}
     \centering
     \includegraphics[width=0.8\textwidth]{Latex/Current Version/Figures/Stalling_vertical.png}
-    \caption{Stalling situation. Standard Dykstra's algorithm applied to a line-box example. The top plot illustrates the trajectories of the iterates, the second plot shows their squared distance to the true Euclidean projection, and the third plot shows the half-space activity. In the activity plot, half-space 2 corresponds to the left side of the box, half-space 1 to the top side of the box, and half-space 0 to the line (down-facing normal).}
+    \caption{Stalling situation. Standard Dykstra's algorithm applied to a line-box example. (Top): The projection path (blue) starts at the original point (blue dot) and projects onto each of the half-spaces. The iterates visibly stall near the left side of the box before converging to the optimal solution (red star). (Middle): The squared error (red) plateaus during the stalling period (yellow), which lasts from iteration 1 until iteration 16, before converging at iteration 30. (Bottom): Half-space activity. The stalling period ends precisely when half-space 0 (black circles), corresponding to the left side of the box, becomes inactive. Half-space 1 (black squares) and half-space 2 (black triangles) correspond to the top of the box and the line, respectively, and remain active.}
     \label{fig:stalling2}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics[width=0.8\textwidth]{Latex/Current Version/Figures/No_stalling_vertical.png}
-    \caption{Modified algorithm with fast-forwarding.}
+    \caption{Modified algorithm with fast-forwarding. (Top): Stalling is detected at iteration 1. The algorithm computes $N_{stall}=15$ using Theorem~\ref{thm:nstall} and ``fast-forwards" the iterates, jumping directly to the point where the standard algorithm would have been at iteration 16. Asymptotic convergence follows from iteration 2 onwards. (Middle): The stalling period (yellow) is eliminated. The algorithm ``converges" (green) at iteration 16. (Bottom): Half-space 0 (black circles) becomes inactive immediately after the fast-forward step.}
     \label{fig:fastforwarding}
 \end{figure}
 
