@@ -25,30 +25,41 @@ k_{m-n+i}+n N_i\left(x_{m+i}^T f_{[m+i]} - c_{[m+i]}\right) < 0,\qquad i\in\math
 so that $N_i=\left\lceil k_{m-n+i} / \left(n(c_{[m+i]}-x_{m+i}^T f_{[m+i]})\right)\right\rceil$. If $i_1<\dots<i_j$ are such that $N_{i_1}=\dots = N_{i_j}$, then according to~\eqref{eq:dykstra}, half-space $i_1$ is discarded first (and thus the minimiser of~\eqref{eq:nstall}).\qed
 \end{pf}
 
-Following the end of the stalling period, one half-space is discarded from the active half-space and $\mathcal{A}$ redefined, upon which the algorithm may again encounter a stalling condition. By Theorem~\eqref{thm:nstall}, the stalling period can be fast-forwarded by applying constant increments to $k_{m+i}$ for $i=0,\dots,N_{stall}$. This is illustrated for the line-box example in Figure~\ref{fig:stallingfixed}, where Figure~\ref{fig:stalling2} replicates the stalling situation from Figure~\ref{fig:baushkeStall} and the fast-forwarding is applied in Figure~\ref{fig:fastforwarding}. The first column illustrates the trajectories of the iterates and their distance to the Eucledian projection computed using an interior point method. The second column shows the half-space activity, where half-space 0 corresponds to the left side of the box, half-space 1 to the top side of the box, and half-space 2 to the line (down-facing normal). In Figure~\ref{fig:stalling2}, the algorithm stalls until iteration 16. From the second column, it can be seen that the algorithm stalls until half-space 0 becomes inactive. 
+Following the end of the stalling period, one half-space is discarded from the active half-space and $\mathcal{A}$ redefined, upon which the algorithm may again encounter a stalling condition. By Theorem~\eqref{thm:nstall}, the stalling period can be fast-forwarded by applying constant increments to $k_{m+i}$ for $i=0,\dots,N_{stall}$. This is illustrated for the line-box example in Figure~\ref{fig:stalling2}, which replicates the stalling situation from~\cite{DYKSTRASTALLING} and the fast-forwarding is applied in Figure~\ref{fig:fastforwarding}. The first column illustrates the trajectories of the iterates and their distance to the Eucledian projection computed using an interior point method. The second column shows the half-space activity, where half-space 0 corresponds to the left side of the box, half-space 1 to the top side of the box, and half-space 2 to the line (down-facing normal). In Figure~\ref{fig:stalling2}, the algorithm stalls until iteration 16. From the second column, it can be seen that the algorithm stalls until half-space 0 becomes inactive. 
 
 In Figure~\ref{fig:fastforwarding}, stalling is detected at iteration 1, upon which the algorithm is fast-forwarded using $N_{stall}=15$ iterations, where $N_{stall}$ is computed using Theorem~\ref{thm:nstall}. At iteration 3, the iterates of the modified algorithm arrive where the iterates of the original algorithm arrive at iteration 16. The iterates of the modified algorithm then become identical to those of the original algorithm.
 
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{Latex/Current Version/Figures/Stalling_vertical.png}
+    \caption{Stalling situation. Standard Dykstra's algorithm applied to a line-box example. The top plot illustrates the trajectories of the iterates, the second plot shows their squared distance to the true Euclidean projection, and the third plot shows the half-space activity. In the activity plot, half-space 2 corresponds to the left side of the box, half-space 1 to the top side of the box, and half-space 0 to the line (down-facing normal).}
+    \label{fig:stalling2}
+\end{figure}
 
 \begin{figure}
     \centering
-    \begin{subfigure}{\textwidth}
-        \centering
-        \includegraphics[width=0.65\textwidth]{Latex/Current Version/Figures/Stalling_vertical.png}
-        \caption{Stalling situation.}
-        \label{fig:stalling2}
-    \end{subfigure}
-    \begin{subfigure}{\textwidth}
-        \centering
-        \includegraphics[width=0.65\textwidth]{Latex/Current Version/Figures/No_stalling_vertical.png}
-        \caption{Modified algorithm with fast-forwarding.}
-        \label{fig:fastforwarding}
-    \end{subfigure}
-    \caption{Dykstra's algorithm applied to a line-box example. The first column illustrates the trajectories of the iterates and their distance to the Euclidean projection computed using an interior point method. The second column shows the half-space activity, where half-space 0 corresponds to the left side of the box, half-space 1 to the top side of the box, and half-space 0 to the line (down-facing normal).}
-    \label{fig:stallingfixed}
+    \includegraphics[width=0.8\textwidth]{Latex/Current Version/Figures/No_stalling_vertical.png}
+    \caption{Modified algorithm with fast-forwarding.}
+    \label{fig:fastforwarding}
 \end{figure}
 
-\newpage
+% \begin{figure}
+%     \centering
+%     \begin{subfigure}{\textwidth}
+%         \centering
+%         \includegraphics[width=0.65\textwidth]{Latex/Current Version/Figures/Stalling_vertical.png}
+%         \caption{Stalling situation.}
+%         \label{fig:stalling2}
+%     \end{subfigure}
+%     \begin{subfigure}{\textwidth}
+%         \centering
+%         \includegraphics[width=0.65\textwidth]{Latex/Current Version/Figures/No_stalling_vertical.png}
+%         \caption{Modified algorithm with fast-forwarding.}
+%         \label{fig:fastforwarding}
+%     \end{subfigure}
+%     \caption{Dykstra's algorithm applied to a line-box example. The first column illustrates the trajectories of the iterates and their distance to the Euclidean projection computed using an interior point method. The second column shows the half-space activity, where half-space 0 corresponds to the left side of the box, half-space 1 to the top side of the box, and half-space 0 to the line (down-facing normal).}
+%     \label{fig:stallingfixed}
+% \end{figure}
 
 \subsection{Additional Analysis: Control Perspective}
 

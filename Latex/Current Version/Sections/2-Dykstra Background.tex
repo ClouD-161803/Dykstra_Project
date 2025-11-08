@@ -2,7 +2,7 @@
 
 \subsection{Euclidean Projections} \label{subsec:euclidean_projections}
 
-In this paper, we restrict ourselves to the specific case of $X = \Rset^p$ and the norm $\twonorm{x}\eqdef (x_1^2+\dots+x_p^2)^{1/2}$. The Euclidean projection of $x^\circ\in\Rset^p$ onto a closed convex set $\mathcal{H}\subset \Rset^p$ is defined as the point $x^\star\coloneqq \mathcal{P}_{\mathcal{H}}(x)$ that minimises the Euclidean distance between $x^\circ$ and any point in $\mathcal{H}$. Here, it is assumed that $\mathcal{H}$ is represented as the intersection of $n$ closed convex sets $\mathcal{H}_i\subset \Rset^p$,
+In this paper, we restrict ourselves to the specific case of $X = \Rset^p$ and the $\ell_2$ norm $\twonorm{x}\eqdef (x_1^2+\dots+x_p^2)^{1/2}$. The Euclidean projection of $x^\circ\in\Rset^p$ onto a closed convex set $\mathcal{H}\subset \Rset^p$ is defined as the point $x^\star\coloneqq \mathcal{P}_{\mathcal{H}}(x)$ that minimises the Euclidean distance between $x^\circ$ and any point in $\mathcal{H}$. Here, it is assumed that $\mathcal{H}$ is represented as the intersection of $n$ closed convex sets $\mathcal{H}_i\subset \Rset^p$,
 \begin{align}\label{eq:intersection}
 \mathcal{H}=\bigcap_{i=0}^{n-1}\mathcal{H}_i,
 \end{align}
@@ -78,7 +78,7 @@ where $[m]\eqdef m \, \text{mod} \, n$, $x_0=x$, $\mathcal{P}_{[m]}\eqdef\mathca
 \end{align}
 The Boyle-Dykstra theorem~\cite{DYKSTRA} implies that $\lim_{m\rightarrow\infty}\anynorm{x_m-\mathcal{P}_\mathcal{H}(x^\circ)}=0$~\cite{DYKSTRA,DYKSTRAPERKINS}. For a finite number of iterations, there is no guarantee that $x_m\in\mathcal{H}$ nor that $x_m\neq x^\circ$. Note that~\eqref{eq:map} can be obtained from~\eqref{eq:dykstra} by setting $e_m=0\,\,\forall m$ in~\eqref{eq:dykstra:error}. 
 
-\subsection{Connection to Fenchel Dual and ADMM} \label{subsec:admm_connection}
+\subsection{Fenchel Dual and ADMM} \label{subsec:admm_connection}
 
 It was established that Dykstra's algorithm is equivalent to a block coordinate descent method applied to the Fenchel dual of the BAP~\cite{HAN1988,GAFFKE1989}. This duality arises from reformulating~\eqref{eq:bap} using the sum of the indicator functions $\delta_{\mathcal{H}_i}(x)$ for each constraint set:
 \begin{equation}
