@@ -14,7 +14,7 @@ Dykstra's algorithm is a cyclic projection method used to find the projection of
 - **Interactive Visualization** - 2D visualization of projection paths, half-spaces, and convergence
 - **Error Tracking** - Monitors convergence and distance to optimal solution
 - **Rounded Box Support** - Edge-rounding utilities for non-axis-aligned convex regions
-- **Generalized Implementation** - Works for any number of dimensions and half-spaces
+- **Generalised Implementation** - Works for any number of dimensions and half-spaces
 
 ### Quick Start
 
@@ -176,7 +176,7 @@ Main solver implementations:
 
 ### `visualiser.py` and `VerticalVisualiser`
 
-Visualization system for projection results:
+Visualisation system for projection results:
 
 - **Visualiser** - Horizontal layout for results
 - **VerticalVisualiser** - Vertical layout for results
@@ -236,7 +236,7 @@ Data structure storing solver outputs:
 |   |   |   master_bib_abbrev.bib      (Bibliography)
 |   |   |   mymath.sty                 (Custom LaTeX math macros)
 |   |   |
-|   |   +---Figures                    (Generated plots and visualizations)
+|   |   +---Figures                    (Generated plots and visualisations)
 |   |   |
 |   |   +---Packages
 |   |   |   \---packages.tex           (LaTeX package configurations)
@@ -265,9 +265,9 @@ Data structure storing solver outputs:
     \---Working Version               (✓ CURRENT PRODUCTION CODE)
             main.py                    (🚀 Entry point - run this to test)
             convex_projection_solver.py (Core solver implementations)
-            visualiser.py              (2D visualization engine)
+            visualiser.py              (2D visualisation engine)
             projection_result.py       (Result data structure)
-            gradient.py                (Gradient/optimization utilities)
+            gradient.py                (Gradient/optimisation utilities)
             edge_rounder.py            (Box rounding utilities)
             dykstra.py                 (Algorithm helper functions)
 ```
@@ -297,7 +297,7 @@ The stalling-aware variant detects when cycling occurs and employs strategies to
 
 ## Performance Considerations
 
-- **Dimension Independence** - Works for any dimension (though visualization limited to 2D)
+- **Dimension Independence** - Works for any dimension (though visualisation limited to 2D)
 - **Scalability** - Performance depends on number of constraints and dimensionality
 - **Convergence** - Guaranteed to converge for convex constraint sets
 - **Stalling** - Modified version handles degenerate cases better
