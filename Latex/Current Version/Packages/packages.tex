@@ -18,6 +18,8 @@
 \usepackage[export]{adjustbox}
 \usepackage{placeins}
 \usepackage{tabto}
+\usepackage{hyperref}
+\usepackage{siunitx}
 
 % already defined in autart.cls
 % \newtheorem{lemma}{Lemma}
@@ -40,14 +42,19 @@
 %%% ALG STUFF
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{algorithm}
-\usepackage{algorithmic}
-\newcommand{\algorithmicbreak}{\textbf{break}}
-\newcommand{\Break}{\State \algorithmicbreak}
-\renewcommand{\algorithmicrequire}{\textbf{Input:}}
-\renewcommand{\algorithmicensure}{\textbf{Output:}}
-\makeatletter
-\newcommand{\algrule}[1][.2pt]{{\color{black!10!white}{\par\vskip.1\baselineskip\hrule height #1\par\vskip.1\baselineskip}}}
-\makeatother
+\usepackage[noend]{algpseudocode}
+
+\usepackage{xcolor}
+\definecolor{commentgrey}{gray}{0.6}
+\newcommand{\algcomment}[1]{\textcolor{commentgrey}{\Comment{#1}}}
+% \usepackage{algorithmic}
+% \newcommand{\algorithmicbreak}{\textbf{break}}
+% \newcommand{\Break}{\State \algorithmicbreak}
+% \renewcommand{\algorithmicrequire}{\textbf{Input:}}
+% \renewcommand{\algorithmicensure}{\textbf{Output:}}
+% \makeatletter
+% \newcommand{\algrule}[1][.2pt]{{\color{black!10!white}{\par\vskip.1\baselineskip\hrule height #1\par\vskip.1\baselineskip}}}
+% \makeatother
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % END CUSTOM INCLUDES & DEFINITIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
