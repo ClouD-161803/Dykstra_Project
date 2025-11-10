@@ -1,11 +1,20 @@
 \section{Fast-Forwarding Dykstra's Algorithm}
 \label{sec:main_result}
 
-In this section, we propose a modification to Dykstra's algorithm to resolve the stalling problem in the general case. This represents the main contribution of this paper.
+% In this section, we propose a modification to Dykstra's algorithm to resolve the stalling problem in the general case.
+
+\subsection{Stalling Formalisation}
+Inspired from the discussion of the stalling phenomenon of~\cite{DYKSTRASTALLING}, we identify as a necessary condition for stalling the stationarity of the iterates for successive iteration cycles over $n$ sets. The stalling period is formalised for $n$ half-spaces in Definition~\ref{def:stalling}.
+
+\begin{defn}[Stalling]\label{def:stalling}
+Given $m\geq n-1$, a stalling period is defined as those $i\in\lbrace 0,\dots,N_{stall}\rbrace$ with $N_{stall}\geq n$ for which $x_{m+i}=x_{m+i-n}$.
+\end{defn}
+
+During stalling, only the auxiliary variables $e_{m+i}$ change, which are modified by constant increments $x_m-x_{m+1}$. The stalling period therefore continues until $e_{m+i}$ becomes such that $x_{m+i}+e_{m-n+i}\in\mathcal{H}_{[m+i]}$. For polyhedral sets, the length of the stalling period can be pre-computed.
 
 \subsection{Stalling Fast-Forwarding} \label{subsec:stalling_fastforward}
 
-We first establish the length of the staling period as $N_{stall}$. This length can be computed as soon as the algorithm encounters stalling, using the half-spaces that are active at this iteration. The stalling period continues until one of these half-spaces becomes inactive, at which point stalling terminates. This is formalised in Theorem~\ref{thm:nstall}.
+To describe the modified algorithm with stalling fast-forwarding, we first establish the length of the staling period as $N_{stall}$. This length can be computed as soon as the algorithm encounters stalling, using the half-spaces that are active at this iteration. The stalling period continues until one of these half-spaces becomes inactive, at which point stalling terminates. This is formalised in Theorem~\ref{thm:nstall}.
 
 \begin{thm}[Length of Stalling Period]\label{thm:nstall}
 Suppose that stalling starts at iteration $m$ as in Def.~\ref{def:stalling} and denote the active half-spaces by $\mathcal{A}\coloneqq\set{i\in\lbrace 0,\dots,n-1\rbrace}{x_{m+i}+e_{m-n+i}\not\in\mathcal{H}_{[m+i]}}$. Then, the length of the stalling period is given by
@@ -25,61 +34,115 @@ so that $N_i=\left\lceil k_{m-n+i} / \left(n(c_{[m+i]}-x_{m+i}^T f_{[m+i]})\righ
 
 Following the end of the stalling period, one half-space is discarded from the active half-space and $\mathcal{A}$ redefined, upon which the algorithm may again encounter a stalling condition. By Theorem~\eqref{thm:nstall}, the stalling period can be fast-forwarded by applying constant increments to $k_{m+i}$ for $i=0,\dots,N_{stall}$.
 
-\subsection{Stall-Averse Dykstra} \label{subsec:algo}
+\subsection{Stall-Averse Algorithm} \label{subsec:algo}
 
-% \begin{algorithm}[h!]
-% \caption{Dykstra's Algorithm with Stall Fast-Forwarding}
+We are now ready to describe the of the modified, stall-aware version of Dykstra's algorithm. Our algorithm proceeds identically to the standard Dykstra's algorithm until it detects stalling by checking the stationarity condition $x_m = x_{m-n}$, as per Definition~\ref{def:stalling}. Once stalling is detected at iteration $m$, the algorithm executes its fast-forwarding phase. After performing the standard variable update for the current iteration, it computes the exact number of required stalling iterations, $N_{stall}$, by calling a function that implements Theorem~\ref{thm:nstall}. From this, it determines the number of full $n$-step cycles to skip, $N_{\text{cycles}} \coloneqq \lceil N_{stall} / n \rceil$. For each of the $n$ dual variables $e_j$, the algorithm then computes the constant increment $\Delta k_j = (\trans{f_j} x_{\text{stall}} - c_j)$ and applies a single, large update: $e_j \leftarrow e_j + N_{\text{cycles}} \cdot (\Delta k_j f_j)$. This ``jumps'' the dual variables forward to their state at iteration $m + N_{stall}$. Finally, the main iteration counter $m$ is advanced by $N_{stall}$, effectively skipping the entire stalling period. The proposed implementation is detailed in Algorithm~\ref{alg:fastforward}.
+
+\begin{algorithm}[H]
+\caption{Stall-Averse Dykstra's Algorithm}
+\label{alg:fastforward}
+\begin{algorithmic}[1]
+    \Function{DykstraFastForward}{$x^\circ, \{\mathcal{H}_i\}_{i=0}^{n-1}, N_{\max}, \epsilon_{\text{stall}}$}
+        \State $x \leftarrow x^\circ$; $e_j \leftarrow 0$ \textbf{for} $j=0, \dots, n-1$; $X_{\text{hist}}[0] \leftarrow x^\circ$; $m \leftarrow 0$ \algcomment{Initialisation}
+        \Statex\hrulefill
+        \While{$m < N_{\max}$}
+            \algcomment{Standard Dykstra's update}
+            \State $e_{[m]} \leftarrow x + e_{[m-n]} - \mathcal{P}_{[m]}(x + e_{[m-n]})$
+            \State $x \leftarrow x + e_{[m-n]} - e_{[m]}$ 
+            \State $X_{\text{hist}}[m+1] \leftarrow x$
+            \Statex\hrulefill
+            \If{$m \ge n \wedge \twonorm{x - X_{\text{hist}}[m-n]} < \epsilon_{\text{stall}}$} \algcomment{Stalling detected per Def.~\ref{def:stalling}}
+                \State $x_{\text{stall}} \leftarrow x$
+                \State $N_{stall} \leftarrow \min_{j \in \mathcal{S}} \left(j+\left\lceil k_j / \left(n(c_j - \trans{f_j} x_{\text{stall}})\right)\right\rceil\right)$ \algcomment{Compute using Thm.~\ref{thm:nstall}}
+                \State $N_{\text{cycles}} \leftarrow \lceil N_{stall} / n \rceil$
+                \For{$j \in \{0, \dots, n-1\}$}
+                    \State $k_j \leftarrow \trans{f_j} e_j$ \algcomment{Get scalar from $e_j = k_j f_j$}
+                    \State $\Delta k_j \leftarrow \trans{f_j} x_{\text{stall}} - c_j$
+                    \State $e_j \leftarrow (k_j + N_{\text{cycles}} \times \Delta k_j) f_j$ \algcomment{Fast-forward dual variable}
+                \EndFor
+                \State $m \leftarrow m + N_{stall}$ \algcomment{Jump iteration counter}
+            \Else
+                \State $m \leftarrow m + 1$ \algcomment{Increment iteration counter}
+            \EndIf
+            \Statex\hrulefill
+        \EndWhile
+        \State \Return $x$
+    \EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+% \begin{algorithm}[h]
+% \caption{Stall-Averse Dykstra's Algorithm}
 % \label{alg:fastforward}
 % \begin{algorithmic}[1]
-% \REQUIRE Initial point $x^\circ$, half-spaces $\{f_i, c_i\}_{i=0}^{n-1}$, max iterations $N_{\max}$, stall tolerance $\epsilon_{\text{stall}}$
-% \STATE \textbf{Initialise:} $x \leftarrow x^\circ$, $e_j \leftarrow \vec{0}$ for $j=0 \dots n-1$
-% \STATE $X_{\text{hist}} \leftarrow [x]$
-% \STATE $m \leftarrow 0$
-% \WHILE{$m < N_{\max}$}
-%     \STATE $i \leftarrow m \pmod n$
-%     \STATE $x_{\text{target}} \leftarrow x + e_i$
-%     \STATE $x_{\text{new}} \leftarrow \mathcal{P}_{\mathcal{H}_i}(x_{\text{target}})$ \COMMENT{Project using~\eqref{eq:dykstra:proj:poly}}
-%     \STATE $e_i \leftarrow x_{\text{target}} - x_{\text{new}}$ \COMMENT{Update auxiliary vector}
-%     \STATE $x \leftarrow x_{\text{new}}$
-%     \STATE $X_{\text{hist}}.append(x)$
-%     \STATE $m \leftarrow m + 1$
-%     \IF{$m \ge n$ \AND $\twonorm{x - X_{\text{hist}}[m-n]} < \epsilon_{\text{stall}}$}
-%         \STATE \COMMENT{Stalling detected}
-%         \STATE $N_{stall} \leftarrow \text{ComputeStallLength}(m, \{e_j\}, \{f_j\}, \{c_j\}, n)$ \COMMENT{Using Thm.~\ref{thm:nstall}}
-%         \STATE $N_{\text{cycles}} \leftarrow \lceil N_{stall} / n \rceil$
-%         \FOR{$j \in \{0, \dots, n-1\}$}
-%             \STATE $k_j \leftarrow \trans{f_j} e_j$ \COMMENT{Get scalar from $e_j = k_j f_j$}
-%             \STATE $\Delta k_j \leftarrow \trans{f_j} x - c_j$ \COMMENT{$x$ is the constant stalling point}
-%             \STATE $k_j \leftarrow k_j + N_{\text{cycles}} \times \Delta k_j$
-%             \STATE $e_j \leftarrow k_j f_j$ \COMMENT{Update auxiliary vector}
-%         \ENDFOR
-%         \STATE $X_{\text{hist}}.extend([x] \times N_{stall})$ \COMMENT{Fill history}
-%         \STATE $m \leftarrow m + N_{stall}$ \COMMENT{Jump iteration counter}
-%     \ENDIF
-% \ENDWHILE
-% \ENSURE $x$
+%     \Function{DykstraFastForward}{$x^\circ, \{\mathcal{H}_i\}_{i=0}^{n-1}, N_{\max}, \epsilon_{\text{stall}}$}
+%         \State $x \leftarrow x^\circ$ \Comment{Initialise iterate}
+%         \State $e_j \leftarrow 0$ \textbf{for} $j=0, \dots, n-1$ \Comment{Initialise auxiliary variables}
+%         \State $X_{\text{hist}}[0] \leftarrow x^\circ$ \Comment{Initialise history array}
+%         \State $m \leftarrow 0$ \Comment{Initialise iteration counter}
+%         \Statex\hrulefill
+%         \While{$m < N_{\max}$}
+%             \State $i \leftarrow m \pmod n$ \Comment{Current half-space index}
+%             \State $x_{\text{target}} \leftarrow x + e_i$ \Comment{Using $e_i$ from $m-n$ iterations ago}
+%             \State $x_{\text{new}} \leftarrow \mathcal{P}_{\mathcal{H}_i}(x_{\text{target}})$ \Comment{Project using~\eqref{eq:dykstra:proj:poly}}
+%             \State $e_i \leftarrow x_{\text{target}} - x_{\text{new}}$ \Comment{Store new error for index $i$}
+%             \State $x \leftarrow x_{\text{new}}$
+%             \State $X_{\text{hist}}[m+1] \leftarrow x$
+%             \State $m \leftarrow m + 1$
+%             \Statex\hrulefill
+%             \If{$m \ge n \wedge \twonorm{x - X_{\text{hist}}[m-n]} < \epsilon_{\text{stall}}$} \Comment{Stalling detected per Def.~\ref{def:stalling}}
+%                 \State $x_{\text{stall}} \leftarrow x$
+%                 \State $N_{stall} \leftarrow \min_{j \in \mathcal{S}} \left(j+\left\lceil k_j / \left(n(c_j - \trans{f_j} x_{\text{stall}})\right)\right\rceil\right)$ \Comment{Compute using Thm.~\ref{thm:nstall}}
+%                 \State $N_{\text{cycles}} \leftarrow \lceil N_{stall} / n \rceil$
+%                 \For{$j \in \{0, \dots, n-1\}$}
+%                     \State $k_j \leftarrow \trans{f_j} e_j$ \Comment{Get scalar from $e_j = k_j f_j$}
+%                     \State $\Delta k_j \leftarrow \trans{f_j} x_{\text{stall}} - c_j$
+%                     \State $e_j \leftarrow (k_j + N_{\text{cycles}} \times \Delta k_j) f_j$ \Comment{Fast-forward dual variable}
+%                 \EndFor
+%                 \State $m \leftarrow m + N_{stall}$ \Comment{Jump iteration counter}
+%             \EndIf
+%             \Statex\hrulefill
+%         \EndWhile
+%         \State \Return $x$
+%     \EndFunction
 % \end{algorithmic}
 % \end{algorithm}
 
 \subsection{Numerical Example} \label{subsec:example}
 
-This is illustrated for the line-box example in Figure~\ref{fig:stalling2}, which replicates the stalling situation from~\cite{DYKSTRASTALLING} and the fast-forwarding is applied in Figure~\ref{fig:fastforwarding}. The first column illustrates the trajectories of the iterates and their distance to the Eucledian projection computed using an interior point method. The second column shows the half-space activity, where half-space 0 corresponds to the left side of the box, half-space 1 to the top side of the box, and half-space 2 to the line (down-facing normal). In Figure~\ref{fig:stalling2}, the algorithm stalls until iteration 16. From the third plot, it can be seen that the algorithm stalls until half-space 0 becomes inactive. 
-
-In Figure~\ref{fig:fastforwarding}, stalling is detected at iteration 1, upon which the algorithm is fast-forwarded using $N_{stall}=15$ iterations, where $N_{stall}$ is computed using Theorem~\ref{thm:nstall}. At iteration 3, the iterates of the modified algorithm arrive where the iterates of the original algorithm arrive at iteration 16. The iterates of the modified algorithm then become identical to those of the original algorithm.
-
-\begin{figure}
+\begin{figure}[h]
     \centering
-    \includegraphics[width=0.8\textwidth]{Latex/Current Version/Figures/Stalling_vertical.png}
-    \caption{Stalling situation. Standard Dykstra's algorithm applied to a line-box example. (Top): The projection path (blue) starts at the original point (blue dot) and projects onto each of the half-spaces. The iterates visibly stall near the left side of the box before converging to the optimal solution (red star). (Middle): The squared error (red) plateaus during the stalling period (yellow), which lasts from iteration 1 until iteration 16, before converging at iteration 30. (Bottom): Half-space activity. The stalling period ends precisely when half-space 0 (black circles), corresponding to the left side of the box, becomes inactive. Half-space 1 (black squares) and half-space 2 (black triangles) correspond to the top of the box and the line, respectively, and remain active.}
+    \includegraphics[width=.9\textwidth]{Latex/Current Version/Figures/Stalling_vertical.png}
+    \caption{Stalling situation. Standard Dykstra's algorithm applied to a line-box example. (Top): The iterates $x_m$ (blue) start at the original point (blue dot) and project onto each of the half-spaces. The path visibly stalls near the left side of the box before converging to the optimal solution (red star). (Middle): The squared error $E(x_m)$ (red) plateaus during the stalling period (yellow), which lasts from iteration 1 until iteration 16, before converging at iteration 30. (Bottom): Half-space activity. The stalling period ends precisely when half-space 0 (black circles), corresponding to the left side of the box, becomes inactive. Half-space 1 (black squares) and half-space 2 (black triangles) correspond to the top of the box and the line, respectively, and remain active.}
     \label{fig:stalling2}
 \end{figure}
 
-\begin{figure}
+% We demonstrate the efficacy of our method through a numerical experiment. The results of our experiment can be reproduced from the repository: \href{https://github.com/ClouD-161803/Dykstra-Project.git}{ClouD-161803/Dykstra-Project}.
+
+We demonstrate the efficacy of our method through a numerical experiment. The results of our experiment can be reproduced from the code repository found in~\cite{DykstraProjectRepo}.
+
+The example we used is the projection of an initial point $x^\circ$ on the intersection of a box and a line in $\mathbb{R}^2$. The box is centered at the origin and can be represented as $[-1, 1] \times [-1, 1]$, and the line passes through the points $[0,1]$ and [-2, 2]. This setup was first described in detail in~\cite[Section 4]{DYKSTRASTALLING}. The initial point was set to $x^\circ = [-4, 1.4]$ to reliably induce the stall, and the ground-truth optimal solution $x^\star$ was computed using the interior-point CQP solver \texttt{quadprog} to serve as a benchmark for error calculations. The convergence behaviour of our proposed algorithm was then monitored via the $\ell_2$ norm of the absolute distance to optimality,
+\[
+E(x_m) \eqdef \ell_2(x_m - x^\star) = \| x_m - x^\star \|_2^2.
+\]
+\begin{figure}[h]
     \centering
-    \includegraphics[width=0.8\textwidth]{Latex/Current Version/Figures/No_stalling_vertical.png}
+    \includegraphics[width=.9\textwidth]{Latex/Current Version/Figures/No_stalling_vertical.png}
     \caption{Modified algorithm with fast-forwarding. (Top): Stalling is detected at iteration 1. The algorithm computes $N_{stall}=15$ using Theorem~\ref{thm:nstall} and ``fast-forwards" the iterates, jumping directly to the point where the standard algorithm would have been at iteration 16. Asymptotic convergence follows from iteration 2 onwards. (Middle): The stalling period (yellow) is eliminated. The algorithm ``converges" (green) at iteration 16. (Bottom): Half-space 0 (black circles) becomes inactive immediately after the fast-forward step.}
     \label{fig:fastforwarding}
 \end{figure}
+Half-space activity was monitored by means of checking~\eqref{eq:sets_i} for each set at each iteration, and we encoded the status of each half space using an indicator function
+\[
+\mathcal{I}_{\mathcal{H}_i}(x) \eqdef
+\begin{cases}
+1 & \text{if } x \in \mathcal{H}_i, \\
+0 & \text{if } x \notin \mathcal{H}_i.
+\end{cases}
+\]
+The stalling situation using standard Dykstra is illustrated in Figure~\ref{fig:stalling2}. The iterates $x_m$ are plotted in the top plot, the errors $E(x_m)$ in the middle plot and the convergence activity of each of the three initially active half-spaces $\mathcal{I}_{\mathcal{H}_i}(x), i = 0,\dots,2$ (top and left-most half-spaces of the box, and bottom half-space of the line) in the bottom plot. Half-space 0 corresponds to the left side of the box, half-space 1 to the top side of the box, and half-space 2 to the line (with down-facing normal). In Figure~\ref{fig:stalling2}, the algorithm stalls until iteration 16. From the third plot, it can be seen that the stalling period extends until half-space 0 becomes inactive.
+
+Figure~\ref{fig:fastforwarding} illustrates the application of our modified method, using Algorithm~\ref{alg:fastforward}, to the same example, effectively resolving the stalling issue. In Figure~\ref{fig:fastforwarding}, stalling is detected at iteration 1, upon which the algorithm is fast-forwarded using $N_{stall}=15$ iterations, where $N_{stall}$ is computed using Theorem~\ref{thm:nstall}. At iteration 3, the iterates of the modified algorithm arrive where the iterates of the original algorithm arrive at iteration 16. The iterates of the modified algorithm then become identical to those of the original algorithm. It is evident that the modified method achieves superior convergence characteristics when compared to standard Dykstra's algorithm. Although this section has showcased a resolution for a simple example in $p = 2$ dimensions with only three active half-spaces, the results of Theorem~\ref{thm:nstall} and Algorithm~\ref{alg:fastforward} will hold in any number of dimensions and for an arbitrary number of half-spaces. Since the proposed algorithm achieves the same iterates after escaping the stalling period as would be attained with standard Dykstra, the Boyle-Dykstra theorem is retained, thus the iterates are guaranteed to converge to the optimal solution $x^\star$ asymptotically. Our method ensures the iterates converge faster and monotonically after half-space discarding, which enables the practical implementation of Dykstra's algorithm for practitioners.
+
 
 % \begin{figure}
 %     \centering
@@ -98,231 +161,3 @@ In Figure~\ref{fig:fastforwarding}, stalling is detected at iteration 1, upon wh
 %     \caption{Dykstra's algorithm applied to a line-box example. The first column illustrates the trajectories of the iterates and their distance to the Euclidean projection computed using an interior point method. The second column shows the half-space activity, where half-space 0 corresponds to the left side of the box, half-space 1 to the top side of the box, and half-space 0 to the line (down-facing normal).}
 %     \label{fig:stallingfixed}
 % \end{figure}
-
-\subsection{Additional Analysis: Control Perspective}
-
-Based on~\cite{DYKSTRAPERKINS}, Dykstra's method can be split into two phases:
-\begin{enumerate}
-\item[(I)] An initial phase during which half-spaces are successively discarded, which includes stalling phases.
-\item[(II)] A second phase during which alternating projections eventually converge to the global projection.
-\end{enumerate}
-
-Although the algorithm includes the non-linear projection operators onto each half-space, it can be simplified during both phases. Assume that at iteration $m$ all half-spaces are active and remain active until iteration $m+n$. In this case, each projection is a linear operator and~\eqref{eq:dykstra} (or~\eqref{eq:dykstra:proj:poly}) becomes:
-\begin{subequations}\label{eq:dykstra20}
-\begin{align}
-x_{m+1}&=x_{m}+e_{m-n} - \left((x_{m}+e_{m-n})^T f_{[m]} - c_{[m]}\right) f_{[m]},\label{eq:dykstra:proj20}\\
-e_m&=\left((x_{m}+e_{m-n})^T f_{[m]} - c_{[m]}\right) f_{[m]}\label{eq:dykstra:error20},
-\end{align}
-\end{subequations}
-By considering that $e_m$ is always parallel to $f_{[m]}$, i.e. $e_m=k_mf_{[m]}$ as in~\eqref{eq:km}, we note that $((x_{m}+e_{m-n})^T f_{[m]} - c_{[m]}) f_{[m]} = e_{m-n} + (x_{m}^T f_{[m]} - c_{[m]}) f_{[m]}$. Moreover, it holds that $(x_{m}^T f_{[m]}) f_{[m]} = f_{[m]} f_{[m]}^T x_{m}$, and by defining
-\begin{align*}
-&F^\perp_{[m]}\coloneqq I-f_{[m]}f_{[m]}^T,
-&\bar{b}_{[m]}\coloneqq c_{[m]} f_{[m]},
-\end{align*}
-formulae~\eqref{eq:dykstra20} can be rewritten as
-\begin{subequations}\label{eq:dykstra2}
-\begin{align}
-x_{m+1}&=F^\perp_{[m]}x_{m}+\bar{b}_{[m]}\eqqcolon \pi_{[m]}(x_{m}),\label{eq:dykstra:proj2}\\
-e_m&=e_{m-n}+(I-F^\perp_{[m]})x_{m}-\bar{b}_{[m]} \eqqcolon e_{m-n}+\tilde{\pi}_{[m]}(x_{m}),\label{eq:dykstra:error2}
-\end{align}
-\end{subequations}
-where $\tilde{\pi}_{[m]}(x_{m})=x_m-\pi_{[m]}(x_{m})$. Equations~\eqref{eq:dykstra2} hold as long as $x_m+e_{m-n}\not\in\mathcal{H}_{[m]}\forall m$, or equivalently
-\begin{align}\label{eq:switch}
-e_{m-n}^T f_{[m]}+x_m^T f_{[m]}-c_{[m]} > 0, \quad\forall m.
-\end{align}
-For the following analysis, change the indexing in~\eqref{eq:dykstra20} for $[m]=1,\dots,n-1$ as
-\begin{align}\label{eq:index}
-x_{m+1} \mapsto x_{k+1}^{[m]},\qquad x_{m} \mapsto x_{k}^{[m-1]},\qquad
-e_{m-n} \mapsto e_{k}^{[m]},\qquad e_{m} \mapsto e_{k+1}^{[m]},
-\end{align}
-and for $[m]=0$ replace $x_{m} \mapsto x_{k}^{[m-1]}$ in~\eqref{eq:index} by $x_{m} \mapsto x_{k-1}^{[m-1]}$
-so that~\eqref{eq:dykstra:proj2} becomes
-\begin{align}\label{eq:dykstrareindex}
-&x_{k+1}^{m}=
-\begin{cases}
-\pi_{m}(x_{k-1}^{n-1}) & \text{for } m=0,\\
-\pi_{m}(x_{k}^{m-1}) & \text{otherwise}
-\end{cases},
-&e_{k+1}^{m}=e_{m-n}+
-\begin{cases}
-\tilde{\pi}_{m}(x_{k-1}^{n-1}) & \text{for } [m]=0,\\
-\tilde{\pi}_{m}(x_{k}^{m-1}) & \text{otherwise},
-\end{cases}
-\end{align}
-where now $m$ is assumed to be restricted to the range $m=0,\dots,n-1$ and $k=0,1,2,\dots$. Using the notation $\pi_i\circ\pi_j(x)=\pi_i(\pi_j(x))$, we expand~\eqref{eq:dykstrareindex} as
-\begin{equation}
-\begin{aligned}
-x_{k+1}^0 &= \pi_0(x_k^{n-1}),\\
-x_{k+1}^1 &= \pi_1\circ\pi_0(x_k^{n-1}),\\
-&\,\,\vdots\\
-x_{k+1}^{n-1} &= \pi_{n-1}\circ\pi_{n-2}\circ\dots\circ\pi_0(x_k^{n-1}),
-\end{aligned}\label{eq:dykstra:proj3}
-\end{equation}
-and~\eqref{eq:dykstra:error2}
-\begin{equation}
-\begin{aligned}
-e_{k+1}^0 &= e_k^0+\tilde{\pi}_0(x_k^{n-1}),\\
-e_{k+1}^1 &= e_k^1+\tilde{\pi}_1\circ\pi_0(x_k^{n-1}),\\
-&\,\,\vdots\\
-e_{k+1}^{n-1} &= e_k^{n-1}+\pi_{n-1}\circ\pi_{n-2}\circ\dots\circ\pi_0(x_k^{n-1}).
-\end{aligned}\label{eq:dykstra:error3}
-\end{equation}
-Replacing $x_k^{n-1}$ in~\eqref{eq:dykstra:proj3} and~\eqref{eq:dykstra:error3} by $x_k^{n-1}=\pi_{n-1}\circ\dots\circ\pi_{j-1}(x_k^{j})$ yields
-\begin{subequations}
-\begin{align}
-x_{k+1}^i &= \underset{p=0}{\overset{n-1}{\circ}}\pi_{[i-p]}(x_{k}^i),\\
-e_{k+1}^i &= e_k^i+\tilde{\pi}_i\circ\left(\underset{p=1}{\overset{n-1}{\circ}}\pi_{[i-p]}(x_{k}^i)\right)
-= e_k^i+\underset{p=1}{\overset{n-1}{\circ}}\pi_{[i-p]}(x_{k}^i)-\underset{p=0}{\overset{n-1}{\circ}}\pi_{[i-p]}(x_{k}^i),
-\end{align}\label{eq:dykstra4}
-\end{subequations}
-where $\underset{p=0}{\overset{n-1}{\circ}}\pi_{[i-p]}(x)=\pi_i\circ\dots\circ\pi_0\circ\pi_{n-1}\circ\dots\circ\pi_{i+1}(x)$. Substituting matrix notation for $\pi_{[i-p]}$ yields
-\begin{subequations}
-\begin{align}
-x_{k+1}^i &= \left(\prod_{p=0}^{n-1}F^\perp_{[i-p]}\right)x_{k}^i+\sum_{p=0}^{n-1}\left(\prod_{l=0}^{n-2-p}F^\perp_{[i-l]}\right)\bar{b}_{[i-(n-1)+p]},\\
-e_{k+1}^i &= e_k^i+(I-F^\perp_{i})\left(\prod_{p=1}^{n-1}F^\perp_{[i-p]}\right)x_{k}^i+(I-F^\perp_{i})\sum_{p=1}^{n-1}\left(\prod_{l=0}^{n-2-p}F^\perp_{[i-l]}\right)\bar{b}_{[i-(n-1)+p]} - \bar{b}_i.
-\end{align}\label{eq:dykstra4}
-\end{subequations}
-and after gathering the matrices and constant vectors in $A_{x,i}$, $b_{x,i}$, $A_{e,i}$, and $b_{e,i}$:
-\begin{subequations}
-\begin{align}
-&x_{k+1}^i = A_{x,i} x_{k}^i+b_{x,i},
-&e_{k+1}^i = e_k^i+A_{e,i} x_{k}^i+b_{e,i}.
-\end{align}
-\end{subequations}
-This is a standard LTI system with constant inputs that can be rewritten in explicit form as:
-\begin{subequations}
-\begin{align}
-&x_{k}^i = A_{x,i}^k x_{0}^i+\sum_{p=0}^{k-1}A_{x,i}^p b_{x,i},
-&e_{k}^i = e_0^i+\sum_{p=0}^{k-1}(A_{e,i} x_{p}^i+b_{e,i}).
-\end{align}
-\end{subequations}
-We note that $A_{e,i}=\tilde{A}_i-A_{x,i}$ and $b_{e,i}=\tilde{b}_i-b_{x,i}$, where
-\begin{align*}
-&\tilde{A}_i=\prod_{p=1}^{n-1}F^\perp_{[i-p]},
-&\tilde{b}_i=\sum_{p=1}^{n-1}\left(\prod_{l=0}^{n-2-p}F^\perp_{[i-l]}\right).
-\end{align*}
-Although the pair $(x_k^i, e_k^i)$ evolves independently of  $(x_k^j, e_k^j),\,j\neq i$, the half spaces are coupled through~\eqref{eq:switch}, which in the new notation reads as
-\begin{align}\label{eq:switch2}
-\begin{cases}
-(e_k^{m})^T f_{m}+(x_{k}^{n-1})^T f_{m}-c_{m} > 0 & \text{for}\quad m=0,\\
-(e_k^{m})^T f_{m}+(x_{k+1}^{m-1})^T f_{m}-c_{m} > 0 & \text{otherwise.}
-\end{cases}
-\end{align}
-
-For example, for $i=n-1$, the matrices and vectors obtained as
-\begin{align*}
-A_{x,n-1}&=F^\perp_{n-1} F^\perp_{n-2}\dots F^\perp_0,\\
-b_{x,n-1}&=F^\perp_{n-1} F^\perp_{n-2}\dots F^\perp_1 c_0 f_0 + F^\perp_{n-1} F^\perp_{n-2}\dots F^\perp_2 c_1 f_1+\dots+F^\perp_{n-1}c_{n-2}f_{n-2}+c_{n-1} f_{n-1},\\
-A_{e,n-1}&=(I-F^\perp_{n-1}) F^\perp_{n-2}\dots F^\perp_0,\\
-b_{e,n-1}&=(I-F^\perp_{n-1}) F^\perp_{n-2}\dots F^\perp_1 c_0 f_0 + (I-F^\perp_{n-1}) F^\perp_{n-2}\dots F^\perp_2 c_1 f_1+\dots+(I-F^\perp_{n-1})c_{n-2}f_{n-2}-c_{n-1} f_{n-1}.
-\end{align*}
-For the remaining $i$, the matrices have similar structure but with products taken over cyclically permuted indices. Recalling that $F^\perp_{n-1}=I-f_{n-1}f_{n-1}^T$, we note from setting $x_{k}^i=x_{k}^{i,\perp}+x_{k}^{i,||}$ with $x_{k}^{i,||}$ parallel to $f_{i}$:
-\begin{align*}
-x_{k+1}^{i,\perp}+x_{k+1}^{i,||} &= A_{x,i} (x_{k}^{i,\perp}+x_{k}^{i,||})+\underbrace{b_{x,i}}_{b_{x,i}^\perp + b_{x,i}^{||}},\\
-&=A_{x,i} (x_{k}^{i,\perp}+x_{k}^{i,||})+b_{x,i}^\perp + b_{x,i}^{||},
-\end{align*}
-where $b_{x,i}^{||}=c_i f_i$. Considering that $A_{x,i} x \perp f_i$, we see that
-\begin{align*}
-&x_{k}^{i,||}=b_{x,i}^{||},
-&x_{k+1}^{i,\perp}=A_{x,i}x_{k}^{i,\perp} + b_{x,i}^\perp+A_{x,i}b_{x,i}^{||}.
-\end{align*}
-In a possible steady state, 
-\begin{align*}
-(I-A_{x,i})x_{ss}^{i,\perp}=b_{x,i}^\perp+A_{x,i}b_{x,i}^{||}.
-\end{align*}
-
-
-\newpage
-\begin{subequations}
-\begin{align}
-x_{k+1}^1 &= \pi_1(\pi_3(\pi_2(x_k^1))),\\
-x_{k+1}^2 &= \pi_2(\pi_1(\pi_3(x_k^2))),\\
-x_{k+1}^3 &= \pi_3(\pi_2(\pi_1(x_k^3))),\\
-e_{k+1}^1 &= \tilde{\pi}_1(\pi_3(\pi_2(x_k^1))+e_k^1),\\
-e_{k+1}^2 &= \tilde{\pi}_2(\pi_1(\pi_3(x_k^2))+e_k^2),\\
-e_{k+1}^3 &= \tilde{\pi}_3(\pi_2(\pi_1(x_k^3))+e_k^3).
-\end{align}\label{eq:dykstra4}
-\end{subequations}
-Clearly, since $\pi_i$ and $\tilde{\pi}_i$ are \textit{linear} operators, \eqref{eq:dykstra4} is of the form $\mathbf{x}_{k+1} = A\mathbf{x}_{k}$. Moreover, it can be seen that the pair $(x_k^i, e_k^i)$ evolves independently of  $(x_k^j, e_k^j),\,j\neq i$. However, the half spaces are coupled through~\eqref{eq:switch}, which in the new notation reads as
-\begin{align}\label{eq:switch2}
-\begin{cases}
-(e_k^{m})^T f_{m}+(x_{k+1}^{m-1})^T f_{m}-c_{m} > 0 & \text{for}\quad m=1,\dots,n-1,\\
-(e_k^{m})^T f_{m}+(x_{k}^{n-1})^T f_{m}-c_{m} > 0 & \text{for}\quad m=0.\\
-\end{cases}
-\end{align}
-We compute $\pi_p(\pi_j(\pi_i(x)))$ as
-\begin{equation}
-\begin{aligned}
-\pi_p(\pi_j(\pi_i(x))) 
-&= \pi_p(\pi_j(x-(\alpha_{x,i} - c_i)f_i)))\\
-&= \pi_p(x-(\alpha_{x,i}-c_i)f_i-(\alpha_{x,j} - (\alpha_{x,i}-c_i)\alpha_{i,j} -c_j)f_j)\\
-&= x-(\alpha_{x,i}-c_i)f_i-(\alpha_{x,j} - (\alpha_{x,i}-c_i)\alpha_{x,j} -c_j)f_j\\
-&\phantom{=}\,\,-(\alpha_{x,p}-(\alpha_{x,i}-c_i)\alpha_{i,p}-(\alpha_{x,j} - (\alpha_{x,i}-c_i)\alpha_{i,j} -c_j)\alpha_{j,p} -c_p)f_p\eqqcolon A_px+b_p,
-\end{aligned}
-\end{equation}
-where $\alpha_{i,j}\coloneqq f_i^T f_j$ and
-\begin{subequations}
-\begin{align}
-A_p&\coloneqq I-f_i f_i^T-f_j f_j^T-f_p f_p^T+\alpha_{i,j}f_j f_i^T+(\alpha_{i,p} -\alpha_{i,j}\alpha_{j,p})f_p f_i^T+\alpha_{j,p}f_pf_j^T,\\
-b_p&\coloneqq c_i f_i+(c_j-c_i\alpha_{i,j})f_j+(c_p-c_i(\alpha_{i,p}-\alpha_{i,j}\alpha_{j,p})-c_j\alpha_{j,p})f_p.
-\end{align}
-\end{subequations}
-Note that $A_p=A_{p\circ j\circ i}$, i.e. it depends on the order of $j$ and $i$. Similarly, $\tilde{\pi}_p(\pi_j(\pi_i(x))+e^p)$ is computed as
-\begin{equation}
-\begin{aligned}
-\tilde{\pi}_p(\pi_j(\pi_i(x))+e^p)
-&=e^p+\tilde{\pi}_p(\pi_j(\pi_i(x))),\\
-&=e^p+x-\pi_p(\pi_j(\pi_i(x))),\\
-&=e^p+(I-A_px-b_p.
-\end{aligned}
-\end{equation}
-With these definitions, \eqref{eq:dykstra4} can be rewritten as
-\begin{subequations}
-\begin{align}
-x_{k+1}^p&=A_p x_k^p +b_p,\\
-e_{k+1}^p&=(I-A_p) x_k^p -b_p,
-\end{align}
-\end{subequations}
-where $p\in\lbrace 1,2,3\rbrace$
-
-
-
-\newpage
-\subsection{OLD NOTATION}
-
-Algorithm~\eqref{eq:dykstra2} can be interpreted as a \textit{linear, time-invariant dynamical system}. To see this, abbreviate~\eqref{eq:dykstra:proj2} and~\eqref{eq:dykstra:error2} as $x_{m+1}\coloneqq\pi_{[m]}(x_{m}+e_{m-n})$ and $e_{m}\coloneqq\tilde{\pi}_{[m]}(x_{m}+e_{m-n})$, respectively, and change the indexing as:
-\begin{align}
-x_{m+1} \mapsto x_{k+1}^{[m]},\qquad x_{m} \mapsto x_{k}^{[m-1]},\qquad
-e_{m-n} \mapsto e_{k}^{[m]},\qquad e_{m} \mapsto e_{k+1}^{[m]}.
-\end{align}
-For simplicity, suppose that there are three half-spaces with iterates $x_k^1$, $x_k^2$, and $x_k^3$, and auxiliary variables $e_k^1$, $e_k^2$, and $e_k^3$. This allows to rewrite~\eqref{eq:dykstra:proj2} as
-\begin{subequations}
-\begin{align}
-x_{k+1}^1 &= \pi_1(x_k^3+e_k^1),\\
-x_{k+1}^2 &= \pi_2(\pi_1(x_k^3+e_k^1)+e_k^2),\\
-x_{k+1}^3 &= \pi_3(\pi_2(\pi_1(x_k^3+e_k^1)+e_k^2)+e_k^3),
-\end{align}\label{eq:dykstra:proj3}
-\end{subequations}
-and~\eqref{eq:dykstra:error2} as
-\begin{subequations}
-\begin{align}
-e_{k+1}^1 &= \tilde{\pi}_1(x_k^3+e_k^1),\\
-e_{k+1}^2 &= \tilde{\pi}_2(\pi_1(x_k^3+e_k^1)+e_k^2),\\
-e_{k+1}^3 &= \tilde{\pi}_3(\pi_2(\pi_1(x_k^3+e_k^1)+e_k^2)+e_k^3).
-\end{align}\label{eq:dykstra:error3}
-\end{subequations}
-Equations~\eqref{eq:dykstra:proj3} and~\eqref{eq:dykstra:error3} can be further manipulated by substituting $x_k^3=\pi_3(\pi_2(x_k^1+e_k^2)+e_k^3)$ for half-space 1 and and $x_k^3=\pi_3(x_k^2+e_k^3)$ for half-space 2:
-\begin{subequations}
-\begin{align}
-x_{k+1}^1 &= \pi_1(\pi_3(\pi_2(x_k^1+e_k^2)+e_k^3)+e_k^1),\\
-x_{k+1}^2 &= \pi_2(\pi_1(\pi_3(x_k^2+e_k^3)+e_k^1)+e_k^2),\\
-x_{k+1}^3 &= \pi_3(\pi_2(\pi_1(x_k^3+e_k^1)+e_k^2)+e_k^3),\\
-e_{k+1}^1 &= \tilde{\pi}_1(\pi_3(\pi_2(x_k^1+e_k^2)+e_k^3)+e_k^1),\\
-e_{k+1}^2 &= \tilde{\pi}_2(\pi_1(\pi_3(x_k^2+e_k^3)+e_k^1)+e_k^2),\\
-e_{k+1}^3 &= \tilde{\pi}_3(\pi_2(\pi_1(x_k^3+e_k^1)+e_k^2)+e_k^3).
-\end{align}\label{eq:dykstra4}
-\end{subequations}
-Clearly, since $\pi_i$ and $\tilde{\pi}_i$ are \textit{linear} operators, \eqref{eq:dykstra4} is of the form $\mathbf{x}_{k+1} = A\mathbf{x}_{k}$, where
-\begin{align*}
-\mathbf{x}_{k+1}\coloneqq\begin{pmatrix}x_{k+1}^1\\ x_{k+1}^2 \\ x_{k+1}^3\\ e_{k+1}^1\\ e_{k+1}^2\\ e_{k+1}^3\end{pmatrix}.
-\end{align*}
