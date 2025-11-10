@@ -1,10 +1,10 @@
 # Dykstra Project
 
-Implementation of **Dykstra's algorithm** for projecting a point onto the intersection of multiple convex sets (half-spaces) in Hilbert space. This project includes implementations of the standard algorithm, a hybrid MAP-Dykstra variant, and a modified version with stalling detection and prevention.
+Implementation of **Dykstra's algorithm** for projecting a point onto the intersection of multiple convex sets (half-spaces) in Hilbert space. This project includes implementations of the standard algorithm, a hybrid MAP-Dykstra variant, and a modified version with stalling detection and fast-forwarding.
 
 ## Overview
 
-Dykstra's algorithm is a cyclic projection method used to find the projection of a point onto a convex feasible region defined by the intersection of multiple half-spaces. This is a fundamental problem in optimization, control theory, and signal processing.
+Dykstra's algorithm is a cyclic projection method used to find the projection of a point onto a feasible region defined by the intersection of multiple convex sets.
 
 ### Key Features
 
